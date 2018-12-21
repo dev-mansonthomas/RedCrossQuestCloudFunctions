@@ -1,12 +1,37 @@
 const {BigQuery} = require('@google-cloud/bigquery');
 const bigquery   = new BigQuery();
 
-const queryStr = ['select count(1), EXTRACT(YEAR from tq.depart) as year',
-  'from `redcrossquest.tronc_queteur` as tq',
-  'where tq.queteur_id = @queteur_id',
-  'AND   tq.deleted    = false',
-  'group by year ',
-  'order by year asc'].join('\n');
+const queryStr = ['select ',
+  'tq.queteur_id,',
+  'SUM(',
+  '  tq.euro2   * 2    ',
+  '  tq.euro1   * 1    ',
+  '  tq.cents50 * 0.5  ',
+  '  tq.cents20 * 0.2  ',
+  '  tq.cents10 * 0.1  ',
+  '  tq.cents5  * 0.05 ',
+  '  tq.cents2  * 0.02 ',
+  '  tq.cent1   * 0.01 ',
+  '  tq.euro5   * 5    ',
+  '  tq.euro10  * 10   ',
+  '  tq.euro20  * 20   ',
+  '  tq.euro50  * 50   ',
+  '  tq.euro100 * 100  ',
+  '  tq.euro200 * 200  ',
+  '  tq.euro500 * 500  ',
+  '  tq.don_cheque     ',
+  '  tq.don_creditcard ',
+  ') as amount,'  ,
+  ' q.first_name,',
+  ' q.last_name'  ,
+  'from `redcrossquest.tronc_queteur` as tq,',
+  '     `redcrossquest.queteur`       as q'  ,
+  'where tq.ul_id    = @ul_id',
+  'AND tq.queteur_id = q.id'  ,
+  'AND  q.active     = true'  ,
+  'AND tq.deleted    = false' ,
+  'group by tq.queteur_id, q.first_name, q.last_name',
+  'order by amount desc'].join('\n');
 
 
 function handleError(err){
@@ -26,7 +51,7 @@ function handleError(err){
  * @param {!Object} event Event payload.
  * @param {!Object} context Metadata for the event.
  */
-exports.queteurNumberOfTroncPerYear = (event, context) => {
+exports.ULRankingByAmount = (event, context) => {
   const pubsubMessage = event.data;
   const parsedObject  = JSON.parse(Buffer.from(pubsubMessage, 'base64').toString());
 
@@ -36,7 +61,7 @@ exports.queteurNumberOfTroncPerYear = (event, context) => {
   const queryObj = {
     query: queryStr,
     params: {
-      queteur_id: parsedObject.queteur_id
+      ul_id: parsedObject.ul_id
     }
   };
 

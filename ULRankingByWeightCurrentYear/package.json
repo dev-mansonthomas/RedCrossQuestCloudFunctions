@@ -1,5 +1,5 @@
 {
-  "name": "queteurCurrentYearAmountTimeWeigthPerYear",
+  "name": "ULRankingByWeightCurrentYear",
   "version": "0.0.1",
   "dependencies": {
     "@google-cloud/pubsub": "^0.22.0",

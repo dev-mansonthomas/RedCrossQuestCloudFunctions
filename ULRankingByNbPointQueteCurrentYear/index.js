@@ -1,12 +1,19 @@
 const {BigQuery} = require('@google-cloud/bigquery');
 const bigquery   = new BigQuery();
 
-const queryStr = ['select count(1), EXTRACT(YEAR from tq.depart) as year',
-  'from `redcrossquest.tronc_queteur` as tq',
-  'where tq.queteur_id = @queteur_id',
-  'AND   tq.deleted    = false',
-  'group by year ',
-  'order by year asc'].join('\n');
+const queryStr = ['select count(distinct(tq.point_quete_id)) as nb_pt_quete,',
+  'q.id,',
+  'q.first_name,',
+  'q.last_name',
+  'from `redcrossquest.tronc_queteur` as tq,',
+  '     `redcrossquest.queteur`       as q',
+  'where tq.ul_id =2',
+  'AND tq.queteur_id = q.id',
+  'AND  q.active     = true  ',
+  'AND tq.deleted    = false ',
+  'AND EXTRACT(YEAR from tq.depart) = EXTRACT(YEAR from CURRENT_DATE())',
+  'group by q.id, q.first_name, q.last_name',
+  'order by nb_pt_quete desc;'].join('\n');
 
 
 function handleError(err){
@@ -26,7 +33,7 @@ function handleError(err){
  * @param {!Object} event Event payload.
  * @param {!Object} context Metadata for the event.
  */
-exports.queteurNumberOfTroncPerYear = (event, context) => {
+exports.ULRankingByNbPointQueteCurrentYear = (event, context) => {
   const pubsubMessage = event.data;
   const parsedObject  = JSON.parse(Buffer.from(pubsubMessage, 'base64').toString());
 
@@ -36,7 +43,7 @@ exports.queteurNumberOfTroncPerYear = (event, context) => {
   const queryObj = {
     query: queryStr,
     params: {
-      queteur_id: parsedObject.queteur_id
+      ul_id: parsedObject.ul_id
     }
   };
 
