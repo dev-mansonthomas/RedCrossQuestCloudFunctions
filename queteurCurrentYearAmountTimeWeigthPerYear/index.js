@@ -1,7 +1,7 @@
 const {BigQuery} = require('@google-cloud/bigquery');
 const bigquery   = new BigQuery();
 
-const queryStr = ['select ',
+const queryStr = ['select EXTRACT(YEAR from tq.depart) as year,',
   'SUM(',
   '  tq.euro2   * 2    +',
   '  tq.euro1   * 1    +',
@@ -41,8 +41,9 @@ const queryStr = ['select ',
   'SUM(DATETIME_DIFF(tq.retour , tq.depart, MINUTE)) as time_spent_in_minutes',
   'from  `redcrossquest.tronc_queteur` as tq',
   'where tq.queteur_id = @queteur_id',
-  'AND   EXTRACT(YEAR from tq.depart)=EXTRACT(YEAR from CURRENT_DATE());',
-  'AND   tq.deleted    = false'].join('\n');
+  'AND   tq.deleted    = false' +
+  'group by year' +
+  'order by year asc'].join('\n');
 
 
 function handleError(err){
@@ -62,7 +63,7 @@ function handleError(err){
  * @param {!Object} event Event payload.
  * @param {!Object} context Metadata for the event.
  */
-exports.queteurCurrentYearAmountTimeWeigth = (event, context) => {
+exports.queteurCurrentYearAmountTimeWeigthPerYear = (event, context) => {
   const pubsubMessage = event.data;
   const parsedObject  = JSON.parse(Buffer.from(pubsubMessage, 'base64').toString());
 
