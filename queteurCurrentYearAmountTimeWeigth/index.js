@@ -53,7 +53,7 @@ function handleError(err){
   } else {
     console.error('ERROR:', err);
   }
-};
+}
 
 /**
  * Triggered from a message on a Cloud Pub/Sub topic.
@@ -61,7 +61,7 @@ function handleError(err){
  * @param {!Object} event Event payload.
  * @param {!Object} context Metadata for the event.
  */
-exports.QueteurCurrentYearAmountTimeWeigth = (event, context) => {
+exports.queteurCurrentYearAmountTimeWeigth = (event, context) => {
   const pubsubMessage = event.data;
   const parsedObject  = JSON.parse(Buffer.from(pubsubMessage, 'base64').toString());
 
