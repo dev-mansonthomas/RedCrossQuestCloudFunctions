@@ -110,11 +110,11 @@ exports.ULQueteurStatsPerYear = (event, context) => {
 
         let   i = 0;
         console.log("Starting batch insert");
-        data.forEach(function(element) {
+        data[0].forEach(function(element) {
           const docRef = collection.doc();
 
-          console.log("Adding to docRef='"+docRef.id+"' : "+JSON.stringify(element[0]));
-          batch.set(docRef, element[0]);
+          console.log("Adding to docRef='"+docRef.id+"' : "+JSON.stringify(element));
+          batch.set(docRef, element);
           i++;
         });
 
