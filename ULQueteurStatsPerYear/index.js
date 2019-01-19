@@ -100,7 +100,7 @@ exports.ULQueteurStatsPerYear = (event, context) => {
     .then((data) => {
       console.log("Query Successful, # rows : "+data.length+" data[0].length:"+data[0].length);
       //rows : [{"amount":367.63,"weight":2399.3,"time_spent_in_minutes":420}]
-
+      const rows = data[0];
       console.log("Query Successful");
 
       const batch       = firestore.batch();
@@ -110,6 +110,22 @@ exports.ULQueteurStatsPerYear = (event, context) => {
       console.log("Getting Collection");
       const collection  = firestore.collection(fsCollectionName);
       console.log("Getting Collection '"+fsCollectionName+"' retrieved");
+
+      for(let i=0;i<rows.length;i++)
+      {
+        console.log("getting a new DocId");
+
+        const docRef = collection.doc();
+
+        console.log("Adding to docRef='"+docRef.id+"' : "+JSON.stringify(rows[i]));
+        batch.set(docRef, rows[i]);
+        console.log("Added to batch");
+      }
+
+      console.log("Commiting batch insert");
+      batch.commit().then(() => {
+        console.log('Successfully executed batch');
+      });
 
     })
     .catch(err => {
