@@ -101,22 +101,33 @@ exports.ULQueteurStatsPerYear = (event, context) => {
       console.log("Query Successful, first row : "+JSON.stringify(data[0][0]));
       //rows : [{"amount":367.63,"weight":2399.3,"time_spent_in_minutes":420}]
 
-      const batch       = firestore.batch();
-      const collection  = firestore.collection(fsCollectionName);
-      let   i = 0;
-      console.log("Starting batch insert");
-      data.forEach(function(element) {
-        const docRef = collection.doc();
+      try
+      {
+        console.log("Creating Batch");
+        const batch       = firestore.batch();
+        console.log("Getting Collection");
+        const collection  = firestore.collection(fsCollectionName);
 
-        console.log("Adding to docRef='"+docRef.id+"' : "+JSON.stringify(element[0]));
-        batch.set(docRef, element[0]);
-        i++;
-      });
+        let   i = 0;
+        console.log("Starting batch insert");
+        data.forEach(function(element) {
+          const docRef = collection.doc();
 
-      console.log("Commiting batch insert");
-      batch.commit().then(() => {
-        console.log('Successfully executed batch of '+i+' rows');
-      });
+          console.log("Adding to docRef='"+docRef.id+"' : "+JSON.stringify(element[0]));
+          batch.set(docRef, element[0]);
+          i++;
+        });
+
+        console.log("Commiting batch insert");
+        batch.commit().then(() => {
+          console.log('Successfully executed batch of '+i+' rows');
+        });
+      }
+      catch(exception)
+      {
+        console.log(JSON.stringify(exception));
+      }
+
 
 
     })
