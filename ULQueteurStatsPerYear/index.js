@@ -101,33 +101,7 @@ exports.ULQueteurStatsPerYear = (event, context) => {
       console.log("Query Successful, # rows : "+data.length+" data[0].length:"+data[0].length);
       //rows : [{"amount":367.63,"weight":2399.3,"time_spent_in_minutes":420}]
 
-      try
-      {
-        console.log("Creating Batch");
-        const batch       = firestore.batch();
-        console.log("Getting Collection");
-        const collection  = firestore.collection(fsCollectionName);
-
-        let   i = 0;
-        console.log("Starting batch insert");
-        data[0].forEach(function(element) {
-          const docRef = collection.doc();
-
-          console.log("Adding to docRef='"+docRef.id+"' : "+JSON.stringify(element));
-          batch.set(docRef, element);
-          i++;
-        });
-
-        console.log("Commiting batch insert");
-        batch.commit().then(() => {
-          console.log('Successfully executed batch of '+i+' rows');
-        });
-      }
-      catch(exception)
-      {
-        console.log(JSON.stringify(exception));
-      }
-
+      console.log("Query Successful");
 
 
     })
