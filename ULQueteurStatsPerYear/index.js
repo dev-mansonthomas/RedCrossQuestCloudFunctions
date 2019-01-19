@@ -98,7 +98,7 @@ exports.ULQueteurStatsPerYear = (event, context) => {
   bigquery
     .query(queryObj)
     .then((data) => {
-      console.log("Query Successful, first row : "+JSON.stringify(data[0][0]));
+      console.log("Query Successful, # rows : "+data.length+" data[0].length:"+data[0].length);
       //rows : [{"amount":367.63,"weight":2399.3,"time_spent_in_minutes":420}]
 
       try
