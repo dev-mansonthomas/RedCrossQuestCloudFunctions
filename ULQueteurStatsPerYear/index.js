@@ -113,10 +113,6 @@ exports.ULQueteurStatsPerYear = (event, context) => {
 
 
 
-      console.log("Commiting batch insert");
-      batch.commit().then(() => {
-        console.log('Successfully executed batch');
-      });
 
     })
     .catch(err => {
