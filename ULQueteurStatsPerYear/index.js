@@ -98,16 +98,17 @@ exports.ULQueteurStatsPerYear = (event, context) => {
   bigquery
     .query(queryObj)
     .then((data) => {
-      console.log("Query Successful, first row : "+JSON.stringify(data[0]));
-      const rows = data[0][0];
+      console.log("Query Successful, first row : "+JSON.stringify(data[0][0]));
       //rows : [{"amount":367.63,"weight":2399.3,"time_spent_in_minutes":420}]
 
       const batch       = firestore.batch();
       const collection  = firestore.collection(fsCollectionName);
       let   i = 0;
-      data.forEach(function(element) {
+      data[0].forEach(function(element) {
         const docRef = collection.doc();
-        batch.set(docRef, element[0]);
+
+        console.log("Adding to docRef='"+docRef.id+"' : "+JSON.stringify(element));
+        batch.set(docRef, element);
         i++;
       });
 
