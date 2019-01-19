@@ -103,7 +103,9 @@ exports.ULQueteurStatsPerYear = (event, context) => {
 
       console.log("Query Successful");
 
+      const batch       = firestore.batch();
 
+      console.log("Batch Created ");
     })
     .catch(err => {
       handleError(err);
