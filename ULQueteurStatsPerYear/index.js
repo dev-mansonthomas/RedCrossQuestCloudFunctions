@@ -104,14 +104,16 @@ exports.ULQueteurStatsPerYear = (event, context) => {
       const batch       = firestore.batch();
       const collection  = firestore.collection(fsCollectionName);
       let   i = 0;
-      data[0].forEach(function(element) {
+      console.log("Starting batch insert");
+      data.forEach(function(element) {
         const docRef = collection.doc();
 
-        console.log("Adding to docRef='"+docRef.id+"' : "+JSON.stringify(element));
-        batch.set(docRef, element);
+        console.log("Adding to docRef='"+docRef.id+"' : "+JSON.stringify(element[0]));
+        batch.set(docRef, element[0]);
         i++;
       });
 
+      console.log("Commiting batch insert");
       batch.commit().then(() => {
         console.log('Successfully executed batch of '+i+' rows');
       });
