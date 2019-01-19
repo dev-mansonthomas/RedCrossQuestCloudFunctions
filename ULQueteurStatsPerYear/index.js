@@ -1,5 +1,11 @@
-const {BigQuery} = require('@google-cloud/bigquery');
-const bigquery   = new BigQuery();
+const {BigQuery}  = require('@google-cloud/bigquery');
+const {Firestore} = require('@google-cloud/firestore');
+
+const bigquery   = new BigQuery  ();
+const firestore  = new Firestore ();
+
+const fsCollectionName = 'ul_queteur_stats_per_year';
+
 
 const queryStr = [
 
@@ -80,7 +86,7 @@ exports.ULQueteurStatsPerYear = (event, context) => {
   const parsedObject  = JSON.parse(Buffer.from(pubsubMessage, 'base64').toString());
 
   console.log("Recieved Message : "+JSON.stringify(parsedObject));
-  //{ queteur_id: parsedObject.queteur_id, ul_id:parsedObject.ul_id }
+  //{ ul_id:parsedObject.ul_id }
 
   const queryObj = {
     query: queryStr,
@@ -92,10 +98,23 @@ exports.ULQueteurStatsPerYear = (event, context) => {
   bigquery
     .query(queryObj)
     .then((data) => {
-      console.log(JSON.stringify(data));
+      console.log("Query Successful, first row : "+JSON.stringify(data[0]));
       const rows = data[0];
       //rows : [{"amount":367.63,"weight":2399.3,"time_spent_in_minutes":420}]
-      //TODO insert dans firestore
+
+      const batch       = firestore.batch();
+      const collection  = firestore.collection(fsCollectionName);
+      let   i = 0;
+      data.forEach(function(element) {
+        const docRef = collection.doc();
+        batch.set(docRef, element);
+        i++;
+      });
+
+      batch.commit().then(() => {
+        console.log('Successfully executed batch of '+i+' rows');
+      });
+
 
     })
     .catch(err => {
