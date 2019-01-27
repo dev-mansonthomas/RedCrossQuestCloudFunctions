@@ -1,6 +1,10 @@
 const {BigQuery} = require('@google-cloud/bigquery');
 const bigquery   = new BigQuery();
 
+
+
+
+
 const queryStr = ['select ',
   'tq.queteur_id,',
   'SUM(',

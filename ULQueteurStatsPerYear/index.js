@@ -95,7 +95,7 @@ exports.ULQueteurStatsPerYear = (event, context) => {
     }
   };
 
-  bigquery
+  return bigquery
     .query(queryObj)
     .then((data) => {
       console.log("Query Successful, # rows : "+data.length+" data[0].length:"+data[0].length);
@@ -124,9 +124,9 @@ exports.ULQueteurStatsPerYear = (event, context) => {
 
 
       console.log("Commiting batch insert");
-
-      //Retourn the promise, otherwise the function will stop running before completing the query
-      return batch.commit();
+      batch.commit().then(() => {
+        console.log('Successfully executed batch');
+      });
 
 
     })
