@@ -69,8 +69,7 @@ ULRankingByAmount/node_modules/
 ULRankingByAmountCurrentYear/node_modules/
 ULRankingByNbPointQuete/node_modules/
 ULRankingByNbPointQueteCurrentYear/node_modules/
-ULQueteurStatsPerYear/node_modules/
-ULRankingByTime/node_modules/
+
 ULRankingByTimeCurrentYear/node_modules/
 ULRankingByWeight/node_modules/
 ULRankingByWeightCurrentYear/node_modules/
@@ -81,3 +80,4 @@ queteurNumberOfTroncPerYear/node_modules/
 
 
 
+/ULQueteurStatsPerYear/node_modules/
