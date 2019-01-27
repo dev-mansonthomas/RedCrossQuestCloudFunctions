@@ -4,6 +4,9 @@ const {Firestore} = require('@google-cloud/firestore');
 const bigquery   = new BigQuery  ();
 const firestore  = new Firestore ();
 
+const settings = {timestampsInSnapshots: true};
+firestore.settings(settings);
+
 const fsCollectionName = 'ul_queteur_stats_per_year';
 
 
