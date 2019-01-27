@@ -111,7 +111,22 @@ exports.ULQueteurStatsPerYear = (event, context) => {
       const collection  = firestore.collection(fsCollectionName);
       console.log("Getting Collection '"+fsCollectionName+"' retrieved");
 
+      for(let i=0;i<rows.length;i++)
+      {
+        console.log("getting a new DocId");
 
+        const docRef = collection.doc();
+
+        console.log("Adding to docRef='"+docRef.id+"' : "+JSON.stringify(rows[i]));
+        batch.set(docRef, rows[i]);
+        console.log("Added to batch");
+      }
+
+
+      console.log("Commiting batch insert");
+
+      //Retourn the promise, otherwise the function will stop running before completing the query
+      return batch.commit();
 
 
     })
