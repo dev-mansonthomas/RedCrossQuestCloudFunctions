@@ -63,7 +63,7 @@ function handleError(err){
  * @param {!Object} event Event payload.
  * @param {!Object} context Metadata for the event.
  */
-exports.ProcessUpdateTroncQueteur = (event, context) => {
+exports.processUpdateTroncQueteur = (event, context) => {
   const pubsubMessage = event.data;
   const parsedObject  = JSON.parse(Buffer.from(pubsubMessage, 'base64').toString());
 
