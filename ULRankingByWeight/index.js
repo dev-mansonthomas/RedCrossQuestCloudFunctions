@@ -63,7 +63,7 @@ exports.ULRankingByWeight = (event, context) => {
     }
   };
 
-  bigquery
+  return bigquery
     .query(queryObj)
     .then((data) => {
       console.log(JSON.stringify(data));

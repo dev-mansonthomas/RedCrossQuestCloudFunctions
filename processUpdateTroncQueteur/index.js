@@ -68,7 +68,7 @@ exports.processUpdateTroncQueteur = (event, context) => {
   const parsedObject  = JSON.parse(Buffer.from(pubsubMessage, 'base64').toString());
 
   console.log("Received Message : "+JSON.stringify(parsedObject));
-  //{ ul_id:parsedObject.ul_id }
+  //{"id":5074,"ul_id":348,"queteur_id":4536,"point_quete_id":121,"tronc_id":290,"depart_theorique":"2019-01-28 16:00:00","depart":"2019-01-28 16:54:24","retour":"2019-01-28 16:54:29","comptage":null,"last_update":"2019-01-28 16:54:32","last_update_user_id":163,"euro500":0,"euro200":0,"euro100":0,"euro50":0,"euro20":0,"euro10":4,"euro5":3,"euro2":34,"euro1":5,"cents50":33,"cents20":4,"cents10":23,"cents5":43,"cents2":4,"cent1":3,"don_cheque":0,"don_creditcard":0,"foreign_coins":null,"foreign_banknote":null,"notes_depart_theorique":"","notes_retour":"","notes_retour_comptage_pieces":"","notes_update":"","deleted":false,"coins_money_bag_id":"","bills_money_bag_id":"","don_cb_total_number":0,"don_cheque_number":0}
 
   const queryObj = {
     query: queryStr,
