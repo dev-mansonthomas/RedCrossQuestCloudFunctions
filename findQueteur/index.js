@@ -77,7 +77,7 @@ exports.findQueteur = (req, res) => {
 
 
   const queryObj = {
-    query : queryStr + (searchByQueteurId ? 'AND q.id = @:id':'AND q.registration_token = @token'),
+    query : queryStr + (searchByQueteurId ? 'AND q.id = @id':'AND q.registration_token = @token'),
     params: params
   };
 
