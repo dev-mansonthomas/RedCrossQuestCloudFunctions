@@ -92,49 +92,4 @@ exports.findQueteurByToken = (req, res) => {
       handleError(err);
       res.status(500).send('Query Error');
     });
-
-
-
-
-
-
-
-
-
-
-};
-
-
-
-/**
- * Triggered from a message on a Cloud Pub/Sub topic.
- *
- * @param {!Object} event Event payload.
- * @param {!Object} context Metadata for the event.
- */
-exports.ULRankingByWeightCurrentYear = (event, context) => {
-  const pubsubMessage = event.data;
-  const parsedObject  = JSON.parse(Buffer.from(pubsubMessage, 'base64').toString());
-
-  console.log("Recieved Message : "+JSON.stringify(parsedObject));
-  //{ queteur_id: parsedObject.queteur_id, ul_id:parsedObject.ul_id }
-
-  const queryObj = {
-    query: queryStr,
-    params: {
-      ul_id: parsedObject.ul_id
-    }
-  };
-
-  bigquery
-    .query(queryObj)
-    .then((data) => {
-      console.log(JSON.stringify(data));
-      const rows = data[0];
-      //rows : [{"amount":367.63,"weight":2399.3,"time_spent_in_minutes":420}]
-    })
-    .catch(err => {
-      handleError(err);
-    });
-
 };

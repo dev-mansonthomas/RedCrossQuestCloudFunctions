@@ -1,4 +1,7 @@
 const {BigQuery} = require('@google-cloud/bigquery');
+const admin      = require("firebase-admin");
+const cors       = require("cors");
+
 const bigquery   = new BigQuery();
 
 const queryStr = [
@@ -42,17 +45,10 @@ function handleError(err){
 
 
 
-/**
- * Responds to any HTTP request.
- *
- * @param {!express:Request} req HTTP request context.
- *        Search By QueteurId : specify an 'id' variable with a positive integer value
+findQueteurByIdImpl=(req, res, decoded)=> {
 
- https://europe-west1-redcrossquest-fr-dev.cloudfunctions.net/findQueteurById?id=120
+  console.log("Authenticated Request : "+JSON.stringify(decoded));
 
- * @param {!express:Response} res HTTP response context.
- */
-exports.findQueteurById = (req, res) => {
   let queteurId = req.query.id ;
   let params = {};
 
@@ -91,49 +87,26 @@ exports.findQueteurById = (req, res) => {
       handleError(err);
       res.status(500).send('Query Error');
     });
-
-
-
-
-
-
-
-
-
-
 };
 
 
 
 /**
- * Triggered from a message on a Cloud Pub/Sub topic.
+ * Responds to any HTTP request.
  *
- * @param {!Object} event Event payload.
- * @param {!Object} context Metadata for the event.
+ * @param {!express:Request} req HTTP request context.
+ *        Search By QueteurId : specify an 'id' variable with a positive integer value
+
+ https://europe-west1-redcrossquest-fr-dev.cloudfunctions.net/findQueteurById?id=120
+
+ * @param {!express:Response} res HTTP response context.
  */
-exports.ULRankingByWeightCurrentYear = (event, context) => {
-  const pubsubMessage = event.data;
-  const parsedObject  = JSON.parse(Buffer.from(pubsubMessage, 'base64').toString());
+exports.findQueteurById = (req, res) => {
+  return cors(req, res, () => {
+    const tokenId = req.get('Authorization').split('Bearer ')[1];
 
-  console.log("Recieved Message : "+JSON.stringify(parsedObject));
-  //{ queteur_id: parsedObject.queteur_id, ul_id:parsedObject.ul_id }
-
-  const queryObj = {
-    query: queryStr,
-    params: {
-      ul_id: parsedObject.ul_id
-    }
-  };
-
-  bigquery
-    .query(queryObj)
-    .then((data) => {
-      console.log(JSON.stringify(data));
-      const rows = data[0];
-      //rows : [{"amount":367.63,"weight":2399.3,"time_spent_in_minutes":420}]
-    })
-    .catch(err => {
-      handleError(err);
-    });
-
+    return admin.auth().verifyIdToken(tokenId)
+      .then ((decoded) => {return findQueteurByIdImpl(req, res, decoded)})
+      .catch((err   )  => res.status(401).send(err));
+  });
 };
