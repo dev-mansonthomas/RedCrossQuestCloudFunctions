@@ -62,6 +62,7 @@ findQueteurByIdImpl=(req, res, decoded)=> {
     res.status(500).send("Invalid query");
   }
 
+  console.log("findQueteurById("+queteurId+")");
 
   const queryObj = {
     query : queryStr,
@@ -102,8 +103,10 @@ findQueteurByIdImpl=(req, res, decoded)=> {
  * @param {!express:Response} res HTTP response context.
  */
 exports.findQueteurById = (req, res) => {
-  return cors(req, res, () => {
+  cors(req, res, () => {
+    console.log("findQueteurById called");
     const tokenId = req.get('Authorization').split('Bearer ')[1];
+    console.log("findQueteurById called with tokenId: "+tokenId);
 
     return admin.auth().verifyIdToken(tokenId)
       .then ((decoded) => {return findQueteurByIdImpl(req, res, decoded)})
