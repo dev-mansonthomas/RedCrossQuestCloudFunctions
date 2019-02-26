@@ -1,5 +1,5 @@
 {
-  "name": "findQueteur",
+  "name": "findQueteurByToken",
   "version": "0.0.1",
   "dependencies": {
     "@google-cloud/bigquery": "^2.0.0"

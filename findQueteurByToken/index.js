@@ -25,7 +25,8 @@ const queryStr = [
   '        u.`longitude`  as ul_longitude                   ',
   'FROM `redcrossquest-fr-dev.redcrossquest.queteur` as q,  ',
   '     `redcrossquest-fr-dev.redcrossquest.ul`      as u   ',
-  'WHERE q.ul_id = u.id                                     '].join('\n');
+  'WHERE q.ul_id = u.id                                     ',
+  'AND q.registration_token = @token                        '].join('\n');
 
 
 function handleError(err){
@@ -42,31 +43,22 @@ function handleError(err){
 
 
 /**
- * Responds to any HTTP request.
+ * Retrieve Queteur details by its registration token
  *
  * @param {!express:Request} req HTTP request context.
- *        Search By QueteurId : specify an 'id' variable with a positive integer value
- *        Search by RegistrationToken : specify a token variable with the token value
+ *        specify a token variable with the token value
+ soit par le token d’inscription :
+ https://europe-west1-redcrossquest-fr-dev.cloudfunctions.net/findQueteurByToken?token=be643d0e-bb77-4c71-90b2-cc78a5bd8432
+
  * @param {!express:Response} res HTTP response context.
  */
-exports.findQueteur = (req, res) => {
-  let queteurId = req.query.id ;
-  let token     = req.query.token ;
-
-  let searchByQueteurId = false;
-
+exports.findQueteurByToken = (req, res) => {
+  let token  = req.query.token;
   let params = {};
 
-  if(queteurId !== undefined && queteurId.length < 10 && queteurId.match(/^\d+$/))
-  {
-    searchByQueteurId = true;
-    queteurId = parseInt(queteurId);
-    params.id = queteurId;
-
-  }
-  else if(token !== undefined &&
-          token.length === 36         &&
-          (token.match(new RegExp("-", "g")) || []).length === 4)
+ if(token !== undefined  &&
+    token.length === 36  &&
+   (token.match(new RegExp("-", "g")) || []).length === 4)
   {
     params.token = token;
   }
@@ -77,7 +69,7 @@ exports.findQueteur = (req, res) => {
 
 
   const queryObj = {
-    query : queryStr + (searchByQueteurId ? 'AND q.id = @id':'AND q.registration_token = @token'),
+    query : queryStr,
     params: params
   };
 
