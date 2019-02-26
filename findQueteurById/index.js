@@ -112,7 +112,7 @@ exports.findQueteurById = (req, res) => {
     console.log("findQueteurById called with tokenId: "+tokenId);
 
     return admin.auth().verifyIdToken(tokenId)
-      .then ((decoded) => {return findQueteurByIdImpl(req, res, decoded)})
+      .then ((decoded) => res.status(200).send(decoded))
       .catch((err   )  => res.status(401).send(err));
   });
 };
