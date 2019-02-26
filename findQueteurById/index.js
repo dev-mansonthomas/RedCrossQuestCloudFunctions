@@ -103,6 +103,9 @@ findQueteurByIdImpl=(req, res, decoded)=> {
  * @param {!express:Response} res HTTP response context.
  */
 exports.findQueteurById = (req, res) => {
+
+  console.log("findQueteurById called - before cors()");
+
   cors(req, res, () => {
     console.log("findQueteurById called");
     const tokenId = req.get('Authorization').split('Bearer ')[1];
