@@ -53,7 +53,7 @@ exports.findULDetailsByToken = (req, res) => {
   let params = {};
 
  if(token         !== undefined &&
-   !(typeof token === 'string') &&
+    typeof token  === 'string'  &&
     token.length  === 36        &&
    (token.match(new RegExp("-", "g")) || []).length === 4)
   {
