@@ -19,9 +19,9 @@ const queryStr = [
   'WHERE us.ul_id = u.id                 ',
   'AND                                   ',
   '(                                     ',
-  '  us.token_benevole    = @token       ',
+  '  us.token_benevole    = @token1      ',
   '  OR                                  ',
-  '  us.token_benevole_1j = @token       ',
+  '  us.token_benevole_1j = @token2      ',
   ')                                     '].join('\n');
 
 
@@ -57,7 +57,8 @@ exports.findULDetailsByToken = (req, res) => {
     token.length  === 36        &&
    (token.match(new RegExp("-", "g")) || []).length === 4)
   {
-    params.token = token;
+    params.token1 = token;
+    params.token2 = token;
   }
   else
   {
