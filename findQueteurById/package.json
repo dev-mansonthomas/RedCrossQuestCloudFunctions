@@ -1,9 +1,0 @@
-{
-  "name": "findQueteurById",
-  "version": "0.0.1",
-  "dependencies": {
-    "@google-cloud/bigquery": "^2.0.0",
-    "firebase-admin": "^7.0.0",
-    "cors": "^2.8.5"
-  }
-}

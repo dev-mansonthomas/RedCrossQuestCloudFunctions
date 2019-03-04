@@ -1,107 +1,119 @@
-/**
- * Copyright 2018 Google Inc. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 'use strict';
 
+const bigquery  = new BigQuery();
 const functions = require('firebase-functions');
 const sanitizer = require('./sanitizer');
-const admin = require('firebase-admin');
+const admin     = require('firebase-admin');
 admin.initializeApp();
 
-// [START allAdd]
-// [START addFunctionTrigger]
-// Adds two numbers to each other.
-exports.addNumbers = functions.https.onCall((data) => {
-// [END addFunctionTrigger]
-  // [START readAddData]
-  // Numbers passed from the client.
-  const firstNumber = data.firstNumber;
-  const secondNumber = data.secondNumber;
-  // [END readAddData]
 
-  // [START addHttpsError]
-  // Checking that attributes are present and are numbers.
-  if (!Number.isFinite(firstNumber) || !Number.isFinite(secondNumber)) {
-    // Throwing an HttpsError so that the client gets the error details.
-    throw new functions.https.HttpsError('invalid-argument', 'The function must be called with ' +
-      'two arguments "firstNumber" and "secondNumber" which must both be numbers.');
+const queryStr = [
+  'SELECT  q.`id`,                                          ',
+  '        q.`email`,                                       ',
+  '        q.`first_name`,                                  ',
+  '        q.`last_name`,                                   ',
+  '        q.`secteur`,                                     ',
+  '        q.`nivol`,                                       ',
+  '        q.`mobile`,                                      ',
+  '        q.`created`,                                     ',
+  '        q.`updated`,                                     ',
+  '        q.`notes`,                                       ',
+  '        q.`ul_id`,                                       ',
+  '        q.`active`,                                      ',
+  '        q.`man`,                                         ',
+  '        q.`birthdate`,                                   ',
+  '        q.`qr_code_printed`,                             ',
+  '        q.`referent_volunteer`,                          ',
+  '        q.`anonymization_token`,                         ',
+  '        q.`anonymization_date`,                          ',
+  '        u.`name`       as ul_name,                       ',
+  '        u.`latitude`   as ul_latitude,                   ',
+  '        u.`longitude`  as ul_longitude                   ',
+  'FROM `redcrossquest-fr-dev.redcrossquest.queteur` as q,  ',
+  '     `redcrossquest-fr-dev.redcrossquest.ul`      as u   ',
+  'WHERE q.ul_id = u.id                                     ',
+  'AND   q.id    = @id                                      '].join('\n');
+
+
+function handleError(err){
+  if (err && err.name === 'PartialFailureError') {
+    if (err.errors && err.errors.length > 0) {
+      console.log('Insert errors:');
+      err.errors.forEach(err => console.error(err));
+    }
+  } else {
+    console.error('ERROR:', err);
   }
-  // [END addHttpsError]
+}
 
-  // [START returnAddData]
-  // returning result.
-  return {
-    firstNumber: firstNumber,
-    secondNumber: secondNumber,
-    operator: '+',
-    operationResult: firstNumber + secondNumber,
-  };
-  // [END returnAddData]
-});
-// [END allAdd]
 
-// [START messageFunctionTrigger]
-// Saves a message to the Firebase Realtime Database but sanitizes the text by removing swearwords.
-exports.addMessage = functions.https.onCall((data, context) => {
+// [START findQueteurById]
+// retrieve Queteur Info from it's ID in RCQ DB
+exports.findQueteurById = functions.https.onCall((data, context) => {
   // [START_EXCLUDE]
   // [START readMessageData]
-  // Message text passed from the client.
-  const text = data.text;
+  // QueteurID
+  const queteurId = data.id;
   // [END readMessageData]
   // [START messageHttpsErrors]
 
   // Checking that the user is authenticated.
-  if (!context.auth) {
+  if (!context.auth)
+  {
     // Throwing an HttpsError so that the client gets the error details.
-    throw new functions.https.HttpsError('failed-precondition', 'The function must be called ' +
-      'while authenticated.');
+    throw new functions.https.HttpsError('failed-precondition', 'The function must be called while authenticated.');
   }
 
   // Checking attribute.
-  if (!(typeof text === 'string') || text.length === 0) {
+  if (!(typeof queteurId === 'number') || queteurId <= 0  || queteurId >= 10000000)
+  {
     // Throwing an HttpsError so that the client gets the error details.
-    throw new functions.https.HttpsError('invalid-argument', 'The function must be called with ' +
-      'one arguments "text" containing the message text to add.');
+    throw new functions.https.HttpsError('invalid-argument', 'Parameter id missing or out of range');
   }
 
   // [END messageHttpsErrors]
 
   // [START authIntegration]
   // Authentication / user information is automatically added to the request.
-  const uid = context.auth.uid;
-  const name = context.auth.token.name || null;
+  const uid     = context.auth.uid;
+  const name    = context.auth.token.name    || null;
   const picture = context.auth.token.picture || null;
-  const email = context.auth.token.email || null;
+  const email   = context.auth.token.email   || null;
+
+  console.log("uid='"+uid+"', name='"+name+"', picture='"+picture+"', email='"+email+"'");
   // [END authIntegration]
 
   // [START returnMessageAsync]
   // Saving the new message to the Realtime Database.
-  const sanitizedMessage = sanitizer.sanitizeText(text); // Sanitize the message.
-  return admin.database().ref('/messages').push({
-    text: sanitizedMessage,
-    author: { uid, name, picture, email },
-  }).then(() => {
-      console.log('New Message written');
-      // Returning the sanitized message to the client.
-      return { text: sanitizedMessage };
+
+
+  params.id = queteurId;
+  console.log("findQueteurById("+queteurId+")");
+
+  const queryObj = {
+    query : queryStr,
+    params: params
+  };
+
+  return bigquery
+    .query(queryObj)
+    .then((data) => {
+      console.log(JSON.stringify(data));
+      if(data !== undefined && Array.isArray(data) && data.length === 1)
+      {
+        return JSON.stringify(data[0]);
+      }
+      else
+      {
+        console.log("query returned incorrect number of rows "+ data.length );
+        return JSON.stringify([]);
+      }
     })
-    // [END returnMessageAsync]
-    .catch((error) => {
-      // Re-throwing the error as an HttpsError so that the client gets the error details.
-      throw new functions.https.HttpsError('unknown', error.message, error);
+    .catch(err => {
+      handleError(err);
+      throw new functions.https.HttpsError('unknown', err.message, err);
     });
+
   // [END_EXCLUDE]
 });
 // [END messageFunctionTrigger]
