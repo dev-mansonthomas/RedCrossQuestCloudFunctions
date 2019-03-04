@@ -105,7 +105,7 @@ exports.findQueteurById = functions.https.onCall((data, context) => {
       }
       else
       {
-        console.log("query returned incorrect number of rows "+ data.length );
+        console.log("query returned incorrect number of rows "+ JSON.stringify(data) );
         return JSON.stringify([]);
       }
     })
