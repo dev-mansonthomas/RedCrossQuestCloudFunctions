@@ -62,7 +62,7 @@ exports.findULDetailsByToken = (req, res) => {
   }
   else
   {
-    res.status(500).send("Invalid query parameter");
+    res.status(500).send("Invalid query parameter, missing token "+(typeof token)+" "+token.length+" "+(token.match(new RegExp("-", "g"))));
   }
 
 
