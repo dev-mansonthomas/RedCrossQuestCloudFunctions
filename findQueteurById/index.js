@@ -3,7 +3,6 @@ const {BigQuery} = require('@google-cloud/bigquery');
 
 const bigquery  = new BigQuery();
 const functions = require('firebase-functions');
-const sanitizer = require('./sanitizer');
 const admin     = require('firebase-admin');
 admin.initializeApp();
 
