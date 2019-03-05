@@ -49,6 +49,8 @@ function handleError(err){
  * @param {!express:Response} res HTTP response context.
  */
 exports.findULDetailsByToken = (req, res) => {
+  res.set('Access-Control-Allow-Origin', "*");
+  res.set('Access-Control-Allow-Methods', 'GET, POST');
   let token  = req.query.token;
   let params = {};
 
