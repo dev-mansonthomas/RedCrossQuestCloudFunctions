@@ -30,7 +30,25 @@ exports.registerQueteur = (req, res) => {
     mysqlPool = mysql.createPool(mysqlConfig);
   }
 
-  mysqlPool.query('SELECT NOW() AS now',
+  var first_name = 'XXX2';
+  var last_name = 'XXX2';
+  var man= 1;
+  var birthdate='2019-03-11';
+  var email='na@na.com';
+  var secteur=1;
+  var nivol='1A';
+  var mobile='33631107592';
+  var ul_registration_token='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
+
+
+  const queryStr = `
+INSERT INTO \`queteur_registration\`
+(\`first_name\`,\`last_name\`,\`man\`,\`birthdate\`,\`email\`,\`secteur\`,\`nivol\`,\`mobile\`,\`created\`,\`ul_registration_token\`)
+VALUES
+( ?,?,?,?,?,?,?,?,NOW(),?)
+`;
+
+  mysqlPool.query(queryStr,
     (err, results) => {
     if (err) {
       console.error(err);
