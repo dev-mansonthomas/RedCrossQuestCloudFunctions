@@ -1,5 +1,5 @@
 {
-  "name": "findULDetailsByToken",
+  "name": "find_ul_details_by_token",
   "version": "0.0.1",
   "dependencies": {
     "@google-cloud/bigquery": "^2.0.0"

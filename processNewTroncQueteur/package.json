@@ -1,5 +1,5 @@
 {
-  "name": "processNewTroncQueteur",
+  "name": "process_new_tronc_queteur",
   "version": "0.0.1",
   "dependencies": {
     "@google-cloud/bigquery": "^2.0.0",
