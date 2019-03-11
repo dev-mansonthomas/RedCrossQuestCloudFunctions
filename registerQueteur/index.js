@@ -49,6 +49,7 @@ VALUES
 `;
 
   mysqlPool.query(queryStr,
+    [first_name, last_name, man, birthdate, email, secteur, nivol, mobile, ul_registration_token],
     (err, results) => {
     if (err) {
       console.error(err);
