@@ -5,7 +5,7 @@ const mysql = require('mysql');
 const connectionName = process.env.INSTANCE_CONNECTION_NAME || '<YOUR INSTANCE CONNECTION NAME>';
 const dbUser         = process.env.SQL_USER                 || '<YOUR DB USER>';
 const dbPassword     = process.env.SQL_PASSWORD             || '<YOUR DB PASSWORD>';
-const dbName         = process.env.SQL_NAME                 || '<YOUR DB NAME>';
+const dbName         = process.env.SQL_DB_NAME              || '<YOUR DB NAME>';
 
 const mysqlConfig = {
   connectionLimit : 1,
