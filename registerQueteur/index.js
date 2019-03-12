@@ -1,11 +1,15 @@
 'use strict';
+const mysql     = require('mysql');
+const functions = require('firebase-functions');
+const admin     = require('firebase-admin');
+admin.initializeApp();
 
-const mysql = require('mysql');
 
-const connectionName = process.env.INSTANCE_CONNECTION_NAME || '<YOUR INSTANCE CONNECTION NAME>';
-const dbUser         = process.env.SQL_USER                 || '<YOUR DB USER>';
-const dbPassword     = process.env.SQL_PASSWORD             || '<YOUR DB PASSWORD>';
-const dbName         = process.env.SQL_DB_NAME              || '<YOUR DB NAME>';
+
+const connectionName = process.env.INSTANCE_CONNECTION_NAME || throw new functions.https.HttpsError('internal', 'env var not defined : INSTANCE_CONNECTION_NAME');
+const dbUser         = process.env.SQL_USER                 || throw new functions.https.HttpsError('internal', 'env var not defined : SQL_USER'                );
+const dbPassword     = process.env.SQL_PASSWORD             || throw new functions.https.HttpsError('internal', 'env var not defined : SQL_PASSWORD'            );
+const dbName         = process.env.SQL_DB_NAME              || throw new functions.https.HttpsError('internal', 'env var not defined : SQL_DB_NAME'             );
 
 const mysqlConfig = {
   connectionLimit : 1,
@@ -21,7 +25,15 @@ if (process.env.NODE_ENV === 'production') {
 // and handle dropped or expired connections automatically.
 let mysqlPool;
 
-exports.registerQueteur = (req, res) => {
+
+exports.registerQueteur = functions.https.onCall((data, context) => {
+
+  if (!context.auth)
+  {
+    // Throwing an HttpsError so that the client gets the error details.
+    throw new functions.https.HttpsError('failed-precondition', 'The function must be called while authenticated.');
+  }
+
   // Initialize the pool lazily, in case SQL access isn't needed for this
   // GCF instance. Doing so minimizes the number of active SQL connections,
   // which helps keep your GCF instances under SQL connection limits.
@@ -30,15 +42,17 @@ exports.registerQueteur = (req, res) => {
     mysqlPool = mysql.createPool(mysqlConfig);
   }
 
-  var first_name = 'XXX2';
-  var last_name = 'XXX2';
-  var man= 1;
-  var birthdate='2019-03-11';
-  var email='na@na.com';
-  var secteur=1;
-  var nivol='1A';
-  var mobile='33631107592';
-  var ul_registration_token='xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
+
+  let first_name           = data.first_name           ;
+  let last_name            = data.last_name            ;
+  let man                  = data.man === 1            ;
+  let birthdate            = data.birthdate            ;
+  let email                = data.email                ;
+  let secteur              = data.secteur              ;
+  let nivol                = data.nivol                ;
+  let mobile               = data.mobile               ;
+  let ul_registration_token= data.ul_registration_token;
+
 
 
   const queryStr = `
@@ -51,14 +65,20 @@ VALUES
   mysqlPool.query(queryStr,
     [first_name, last_name, man, birthdate, email, secteur, nivol, mobile, ul_registration_token],
     (err, results) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send(err);
-    } else {
-      res.send(JSON.stringify(results));
-    }
-  });
+      if (err)
+      {
+        console.error(err);
+        throw new functions.https.HttpsError('unknown', err.message, err);
+      }
+      else
+      {
+        return JSON.stringify(results);
+      }
+    });
 
   // Close any SQL resources that were declared inside this function.
   // Keep any declared in global scope (e.g. mysqlPool) for later reuse.
-};
+
+});
+
+
