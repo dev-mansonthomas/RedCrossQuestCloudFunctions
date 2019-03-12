@@ -2,6 +2,7 @@
 const mysql     = require('mysql');
 const functions = require('firebase-functions');
 const admin     = require('firebase-admin');
+const uuidv4    = require('uuid/v4');
 admin.initializeApp();
 
 
@@ -71,18 +72,19 @@ exports.registerQueteur = functions.https.onCall((data, context) => {
   let nivol                = data.nivol                ;
   let mobile               = data.mobile               ;
   let ul_registration_token= data.ul_registration_token;
+  let queteur_reg_token    = uuidv4();
 
 
 
   const queryStr = `
 INSERT INTO \`queteur_registration\`
-(\`first_name\`,\`last_name\`,\`man\`,\`birthdate\`,\`email\`,\`secteur\`,\`nivol\`,\`mobile\`,\`created\`,\`ul_registration_token\`)
+(\`first_name\`,\`last_name\`,\`man\`,\`birthdate\`,\`email\`,\`secteur\`,\`nivol\`,\`mobile\`,\`created\`,\`ul_registration_token\`, \`queteur_registration_token\`)
 VALUES
-( ?,?,?,?,?,?,?,?,NOW(),?)
+( ?,?,?,?,?,?,?,?,NOW(),?,?)
 `;
 
   mysqlPool.query(queryStr,
-    [first_name, last_name, man, birthdate, email, secteur, nivol, mobile, ul_registration_token],
+    [first_name, last_name, man, birthdate, email, secteur, nivol, mobile, ul_registration_token, queteur_reg_token],
     (err, results) => {
       if (err)
       {
@@ -91,7 +93,7 @@ VALUES
       }
       else
       {
-        return JSON.stringify(results);
+        return JSON.stringify({"queteur_registration_token":queteur_reg_token});
       }
     });
 

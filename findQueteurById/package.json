@@ -10,8 +10,10 @@
     "logs": "firebase functions:log"
   },
   "dependencies": {
-    "firebase-admin": "~6.4.0",
-    "firebase-functions": "^2.1.0",
+    "firebase-admin": "^7.0.0",
+    "firebase-functions": "^2.2.0",
+    "ajv": "^6.10.0",
+    "ajv-keywords": "^3.4.0",
     "@google-cloud/bigquery": "^2.0.0"
   },
   "devDependencies": {
