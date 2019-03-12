@@ -6,10 +6,11 @@ admin.initializeApp();
 
 
 
-const connectionName = process.env.INSTANCE_CONNECTION_NAME || throw new functions.https.HttpsError('internal', 'env var not defined : INSTANCE_CONNECTION_NAME');
-const dbUser         = process.env.SQL_USER                 || throw new functions.https.HttpsError('internal', 'env var not defined : SQL_USER'                );
-const dbPassword     = process.env.SQL_PASSWORD             || throw new functions.https.HttpsError('internal', 'env var not defined : SQL_PASSWORD'            );
-const dbName         = process.env.SQL_DB_NAME              || throw new functions.https.HttpsError('internal', 'env var not defined : SQL_DB_NAME'             );
+const connectionName = process.env.INSTANCE_CONNECTION_NAME || null;
+const dbUser         = process.env.SQL_USER                 || null;
+const dbPassword     = process.env.SQL_PASSWORD             || null;
+const dbName         = process.env.SQL_DB_NAME              || null;
+
 
 const mysqlConfig = {
   connectionLimit : 1,
@@ -39,6 +40,24 @@ exports.registerQueteur = functions.https.onCall((data, context) => {
   // which helps keep your GCF instances under SQL connection limits.
   if (!mysqlPool)
   {
+
+    if(connectionName === null)
+    {
+      throw new functions.https.HttpsError('internal', 'env var not defined : INSTANCE_CONNECTION_NAME');
+    }
+    if(dbUser         === null)
+    {
+      throw new functions.https.HttpsError('internal', 'env var not defined : SQL_USER'                );
+    }
+    if(dbPassword     === null)
+    {
+      throw new functions.https.HttpsError('internal', 'env var not defined : SQL_PASSWORD'            );
+    }
+    if( dbName        === null)
+    {
+      throw new functions.https.HttpsError('internal', 'env var not defined : SQL_DB_NAME'             );
+    }
+
     mysqlPool = mysql.createPool(mysqlConfig);
   }
 
