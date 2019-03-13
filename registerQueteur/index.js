@@ -83,21 +83,24 @@ VALUES
 ( ?,?,?,?,?,?,?,?,NOW(),?,?)
 `;
 
-  return mysqlPool.query(queryStr,
-    [first_name, last_name, man, birthdate, email, secteur, nivol, mobile, ul_registration_token, queteur_reg_token],
-    (err, results) => {
-      if (err)
-      {
-        console.error(err);
-        throw new functions.https.HttpsError('unknown', err.message, err);
-      }
-      else
-      {
-        console.info("registering "+email+" "+queteur_reg_token);
 
-        return JSON.stringify({"queteur_registration_token":queteur_reg_token});
-      }
-    });
+  return new Promise((resolve, reject) => {
+    mysqlPool.query(queryStr,
+      [first_name, last_name, man, birthdate, email, secteur, nivol, mobile, ul_registration_token, queteur_reg_token],
+      (err, results) => {
+        if (err)
+        {
+          console.error(err);
+          reject(err);
+        }
+        else
+        {
+          console.info("registering "+email+" "+queteur_reg_token);
+          resolve(JSON.stringify({"queteur_registration_token":queteur_reg_token}));
+        }
+      });
+  }).catch((err) =>{throw new functions.https.HttpsError('unknown', err.message, err);});
+
 
   // Close any SQL resources that were declared inside this function.
   // Keep any declared in global scope (e.g. mysqlPool) for later reuse.
