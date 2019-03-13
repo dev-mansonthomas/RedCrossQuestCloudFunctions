@@ -93,8 +93,9 @@ VALUES
       }
       else
       {
-        console.error("registering email : "+queteur_reg_token);
-        return queteur_reg_token;
+        console.info("registering "+email+" "+queteur_reg_token);
+
+        return JSON.stringify([queteur_reg_token]);
       }
     });
 
