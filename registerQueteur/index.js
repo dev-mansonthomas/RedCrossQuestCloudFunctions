@@ -83,7 +83,7 @@ VALUES
 ( ?,?,?,?,?,?,?,?,NOW(),?,?)
 `;
 
-  mysqlPool.query(queryStr,
+  return mysqlPool.query(queryStr,
     [first_name, last_name, man, birthdate, email, secteur, nivol, mobile, ul_registration_token, queteur_reg_token],
     (err, results) => {
       if (err)
@@ -95,7 +95,7 @@ VALUES
       {
         console.info("registering "+email+" "+queteur_reg_token);
 
-        return JSON.stringify([queteur_reg_token]);
+        return JSON.stringify({"queteur_registration_token":queteur_reg_token});
       }
     });
 
