@@ -1,0 +1,7 @@
+{
+  "name": "notify_red_quest_of_registration_approval",
+  "version": "0.0.1",
+  "dependencies": {
+    "@google-cloud/firestore": "^1.2.0"
+  }
+}
