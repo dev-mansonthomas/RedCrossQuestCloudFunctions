@@ -1,5 +1,5 @@
-const Firestore    = require('@google-cloud/firestore');
-
+const Firestore = require('@google-cloud/firestore');
+const firestore = new Firestore();
 
 /**
  * Triggered from a message on a Cloud Pub/Sub topic.
@@ -19,7 +19,7 @@ exports.notifyRedQuestOfRegistrationApproval = (event, context) => {
 
   let updateQueteur = function(documentId, parsedObject)
   {
-    Firestore.collection('queteurs')
+    firestore.collection('queteurs')
       .doc(documentId)
       .update(
         {
@@ -29,7 +29,7 @@ exports.notifyRedQuestOfRegistrationApproval = (event, context) => {
       })
   };
 
-  return Firestore.collection('queteurs',
+  return firestore.collection('queteurs',
     ref => ref.where('queteur_registration_token', '==', parsedObject.queteur_registration_token))
     .get().then(doc =>
       {
