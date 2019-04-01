@@ -29,9 +29,9 @@ exports.notifyRedQuestOfRegistrationApproval = (event, context) => {
       })
   };
 
-  return firestore.collection('queteurs',
-    ref => ref.where('queteur_registration_token', '==', parsedObject.queteur_registration_token))
-    .get().then(doc =>
+  return firestore.collection('queteurs').where('queteur_registration_token', '==', parsedObject.queteur_registration_token)
+  .get()
+  .then(doc =>
       {
 
         if(doc.docs.length === 1)
@@ -53,5 +53,8 @@ exports.notifyRedQuestOfRegistrationApproval = (event, context) => {
           }
           console.log(logString);
         }
-    });
+    })
+  .catch(function(error) {
+    console.log("Error while searching for queteur with queteur_registration_token : '"+parsedObject.queteur_registration_token+"'", error);
+  });
 };
