@@ -17,25 +17,41 @@ exports.notifyRedQuestOfRegistrationApproval = (event, context) => {
 
 
 
-  let updateQueteur = function(documentId, c)
+  let updateQueteur = function(documentId, parsedObject)
   {
     Firestore.collection('queteurs')
       .doc(documentId)
       .update(
         {
-          accountActivated: parsedObject.registration_approved,
-          reject_reason   : parsedObject.reject_reason,
-          queteur_id      : parsedObject.queteur_id
+          registration_approved : parsedObject.registration_approved,
+          reject_reason         : parsedObject.reject_reason,
+          queteur_id            : parsedObject.queteur_id
       })
   };
 
   return Firestore.collection('queteurs',
     ref => ref.where('queteur_registration_token', '==', parsedObject.queteur_registration_token))
-    .get().then(doc => {
-      let document = doc.docs[0];
-      updateQueteur(document.id, parsedObject);
+    .get().then(doc =>
+      {
+
+        if(doc.docs.length === 1)
+        {
+          let document = doc.docs[0];
+          console.log("retrieved queteur document to update : "+JSON.stringify(document));
+          updateQueteur(document.id, parsedObject);
+        }
+        else if(doc.docs.length === 0)
+        {
+          console.log("No document found in 'queteurs' collection for queteur_registration_token "+parsedObject.queteur_registration_token);
+        }
+        else
+        {
+          let logString = "Multiple document found with same queteur_registration_token='"+parsedObject.queteur_registration_token+"', documents ids : ";
+          for(let i=0; i<doc.docs.length; i++)
+          {
+            logString+=doc.docs[i].id+", ";
+          }
+          console.log(logString);
+        }
     });
-
-
-
 };
