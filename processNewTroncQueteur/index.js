@@ -1,4 +1,4 @@
-const BigQuery     = require('@google-cloud/bigquery');
+const {BigQuery}   = require('@google-cloud/bigquery');
 const {PubSub}     = require('@google-cloud/pubsub');
 
 const topicName    = 'queteur_data_updated';
@@ -25,7 +25,7 @@ function handleError(err){
   } else {
     console.error('ERROR:', err);
   }
-};
+}
 
 
 /**
