@@ -4,9 +4,7 @@ const {PubSub}  = require('@google-cloud/pubsub');
 
 const topicName       = 'ul_update';
 const pubsubClient    = new PubSub();
-const topicPublisher  =  pubsubClient
-                          .topic     (topicName)
-                          .publisher();
+
 
 function handleError(err){
   if (err && err.name === 'PartialFailureError') {
@@ -84,7 +82,8 @@ ORDER BY date_demarrage_rcq asc
             // by taking the index (i) * 400 as a delay for setTimeout
             setTimeout(function()
                        {
-                         topicPublisher
+                         pubsubClient
+                         .topic     (topicName)
                          .publish   (dataBuffer)
                          .then      ((data)=>{
                            console.debug("Published 1 message on topic '"+topicName+"' "+JSON.stringify(ul) + " data:"+JSON.stringify(data));
