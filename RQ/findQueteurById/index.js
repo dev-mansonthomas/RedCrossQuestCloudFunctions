@@ -9,6 +9,9 @@ const admin     = require('firebase-admin');
 admin.initializeApp();
 
 
+
+
+
 const connectionName = process.env.INSTANCE_CONNECTION_NAME || null;
 const dbUser         = process.env.SQL_USER                 || null;
 const dbPassword     = process.env.SQL_PASSWORD             || null;
