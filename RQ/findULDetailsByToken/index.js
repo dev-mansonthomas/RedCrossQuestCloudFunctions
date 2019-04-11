@@ -73,6 +73,14 @@ exports.findULDetailsByToken = (req, res) => {
     res.status(500).send("Invalid query parameter, missing token "+(typeof token)+" "+token.length+" "+(token.match(new RegExp("-", "g"))));
   }
 
+  // Initialize the pool lazily, in case SQL access isn't needed for this
+  // GCF instance. Doing so minimizes the number of active SQL connections,
+  // which helps keep your GCF instances under SQL connection limits.
+  if (!mysqlPool)
+  {
+    mysqlPool = mysql.createPool(mysqlConfig);
+  }
+
   return new Promise((resolve, reject) => {
     mysqlPool.query(queryStr, [token, token],
                     (err, results) => {
