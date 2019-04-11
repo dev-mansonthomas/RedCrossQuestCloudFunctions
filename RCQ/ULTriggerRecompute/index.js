@@ -40,6 +40,8 @@ let mysqlPool;
 
 exports.ULTriggerRecompute = (req, res) => {
 
+
+  console.debug("start of processing");
   // Initialize the pool lazily, in case SQL access isn't needed for this
   // GCF instance. Doing so minimizes the number of active SQL connections,
   // which helps keep your GCF instances under SQL connection limits.
@@ -70,6 +72,8 @@ ORDER BY date_demarrage_rcq asc
       }
       else
       {
+        let logMessage = "Start processing UL array of size :"+results.length;
+        console.debug(logMessage);
         if(results !== undefined && Array.isArray(results) && results.length >= 1)
         {
           let i=0;
