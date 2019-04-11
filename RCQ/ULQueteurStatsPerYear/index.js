@@ -1,14 +1,32 @@
-const {BigQuery}  = require('@google-cloud/bigquery');
+'use strict';
+const mysql     = require('mysql');
+
 const {Firestore} = require('@google-cloud/firestore');
-
-const bigquery   = new BigQuery  ();
-const firestore  = new Firestore ();
-
-const settings = {timestampsInSnapshots: true};
+const firestore   = new Firestore ();
+const settings    = {timestampsInSnapshots: true};
 firestore.settings(settings);
 
 const fsCollectionName = 'ul_queteur_stats_per_year';
 
+
+const connectionName = process.env.INSTANCE_CONNECTION_NAME || null;
+const dbUser         = process.env.SQL_USER                 || null;
+const dbPassword     = process.env.SQL_PASSWORD             || null;
+const dbName         = process.env.SQL_DB_NAME              || null;
+
+const mysqlConfig = {
+  connectionLimit : 1,
+  user            : dbUser,
+  password        : dbPassword,
+  database        : dbName,
+};
+if (process.env.NODE_ENV === 'production') {
+  mysqlConfig.socketPath = `/cloudsql/${connectionName}`;
+}
+
+// Connection pools reuse connections between invocations,
+// and handle dropped or expired connections automatically.
+let mysqlPool;
 
 const queryStr = [
 
@@ -57,84 +75,58 @@ const queryStr = [
   '  q.first_name,',
   '  q.last_name, ',
   '  EXTRACT(YEAR from tq.depart) as year    ',
-  'from `redcrossquest.tronc_queteur` as tq, ',
-  '     `redcrossquest.queteur`       as q   ',
-  'where tq.ul_id      = @ul_id              ',
+  'from `tronc_queteur` as tq, ',
+  '     `queteur`       as q   ',
+  'where tq.ul_id      = ?              ',
   'AND   tq.queteur_id = q.id                ',
   'AND    q.active     = true                ',
   'AND   tq.deleted    = false               ',
   'group by tq.ul_id, tq.queteur_id, q.first_name, q.last_name,  year ',
   'order by amount desc '].join('\n');
 
-
-function handleError(err){
-  if (err && err.name === 'PartialFailureError') {
-    if (err.errors && err.errors.length > 0) {
-      console.log('Insert errors:');
-      err.errors.forEach(err => console.error(err));
-    }
-  } else {
-    console.error('ERROR:', err);
-  }
-}
-
-/**
- * Triggered from a message on a Cloud Pub/Sub topic.
- *
- * @param {!Object} event Event payload.
- * @param {!Object} context Metadata for the event.
- */
 exports.ULQueteurStatsPerYear = (event, context) => {
+
   const pubsubMessage = event.data;
   const parsedObject  = JSON.parse(Buffer.from(pubsubMessage, 'base64').toString());
 
-  console.log("Recieved Message : "+JSON.stringify(parsedObject));
-  //{ ul_id:parsedObject.ul_id }
+  // Initialize the pool lazily, in case SQL access isn't needed for this
+  // GCF instance. Doing so minimizes the number of active SQL connections,
+  // which helps keep your GCF instances under SQL connection limits.
+  if (!mysqlPool)
+  {
+    mysqlPool = mysql.createPool(mysqlConfig);
+  }
 
-  const queryObj = {
-    query: queryStr,
-    params: {
-      ul_id: parsedObject.ul_id
-    }
-  };
+  return new Promise((resolve, reject) => {
+    mysqlPool.query(queryStr, [parsedObject.id],
+      (err, results) => {
+        if (err)
+        {
+          console.error(err);
+          reject(err);
+        }
+        else
+        {
+          if(results !== undefined && Array.isArray(results) && results.length >= 1)
+          {
+            const batch       = firestore.batch();
+            const collection  = firestore.collection(fsCollectionName);
+            let i = 0;
+            results.forEach((rows) =>
+              {
+                const docRef = collection.doc();
+                batch.set(docRef, rows[i]);
+              });
 
-  return bigquery
-    .query(queryObj)
-    .then((data) => {
-      console.log("Query Successful, # rows : "+data.length+" data[0].length:"+data[0].length);
-      //rows : [{"amount":367.63,"weight":2399.3,"time_spent_in_minutes":420}]
-      const rows = data[0];
-      console.log("Query Successful");
+            batch.commit().then(() => {
 
-      const batch       = firestore.batch();
+              let logMessage = "ULQueteurStatsPerYear for UL='"+parsedObject.name+"'("+parsedObject.id+") : "+i+" rows inserted";
 
-      console.log("Batch Created ");
-
-      console.log("Getting Collection");
-      const collection  = firestore.collection(fsCollectionName);
-      console.log("Getting Collection '"+fsCollectionName+"' retrieved");
-
-      for(let i=0;i<rows.length;i++)
-      {
-        console.log("getting a new DocId");
-
-        const docRef = collection.doc();
-
-        console.log("Adding to docRef='"+docRef.id+"' : "+JSON.stringify(rows[i]));
-        batch.set(docRef, rows[i]);
-        console.log("Added to batch");
-      }
-
-
-      console.log("Commiting batch insert");
-      batch.commit().then(() => {
-        console.log('Successfully executed batch');
+              console.log(logMessage);
+              resolve(logMessage);
+            });
+          }
+        }
       });
-
-
-    })
-    .catch(err => {
-      handleError(err);
-    });
-
+  });
 };

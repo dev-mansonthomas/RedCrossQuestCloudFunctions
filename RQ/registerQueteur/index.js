@@ -28,6 +28,14 @@ if (process.env.NODE_ENV === 'production') {
 let mysqlPool;
 
 
+const queryStr = `
+INSERT INTO \`queteur_registration\`
+(\`first_name\`,\`last_name\`,\`man\`,\`birthdate\`,\`email\`,\`secteur\`,\`nivol\`,\`mobile\`,\`created\`,\`ul_registration_token\`, \`queteur_registration_token\`)
+VALUES
+( ?,?,?,?,?,?,?,?,NOW(),?,?)
+`;
+
+
 exports.registerQueteur = functions.https.onCall((data, context) => {
 
   if (!context.auth)
@@ -73,15 +81,6 @@ exports.registerQueteur = functions.https.onCall((data, context) => {
   let mobile               = data.mobile               ;
   let ul_registration_token= data.ul_registration_token;
   let queteur_reg_token    = uuidv4();
-
-
-
-  const queryStr = `
-INSERT INTO \`queteur_registration\`
-(\`first_name\`,\`last_name\`,\`man\`,\`birthdate\`,\`email\`,\`secteur\`,\`nivol\`,\`mobile\`,\`created\`,\`ul_registration_token\`, \`queteur_registration_token\`)
-VALUES
-( ?,?,?,?,?,?,?,?,NOW(),?,?)
-`;
 
 
   return new Promise((resolve, reject) => {

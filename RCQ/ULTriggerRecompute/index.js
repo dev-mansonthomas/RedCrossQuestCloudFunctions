@@ -38,9 +38,18 @@ if (process.env.NODE_ENV === 'production') {
 // and handle dropped or expired connections automatically.
 let mysqlPool;
 
+const queryStr = `
+SELECT u.id, u.name, u.phone, u.latitude, u.longitude, u.address, u.postal_code, u.city, u.external_id, u.email, 
+       u.id_structure_rattachement, u.date_demarrage_activite, u.date_demarrage_rcq, u.publicDashboard, u.spotfire_access_token,
+       us.id as settings_id, us.settings
+FROM   ul u,
+       ul_settings us
+WHERE  u.date_demarrage_rcq is not null
+AND    u.id = us.ul_id
+ORDER BY date_demarrage_rcq asc
+`;
 
-
-exports.ULTriggerRecompute = (req, res) => {
+exports.ULTriggerRecompute = (event, context) => {
 
 
   console.error("start of processing");
@@ -51,18 +60,6 @@ exports.ULTriggerRecompute = (req, res) => {
   {
     mysqlPool = mysql.createPool(mysqlConfig);
   }
-
-
-  const queryStr = `
-SELECT u.id, u.name, u.phone, u.latitude, u.longitude, u.address, u.postal_code, u.city, u.external_id, u.email, 
-       u.id_structure_rattachement, u.date_demarrage_activite, u.date_demarrage_rcq, u.publicDashboard, u.spotfire_access_token,
-       us.id as settings_id, us.settings
-FROM   ul u,
-       ul_settings us
-WHERE  u.date_demarrage_rcq is not null
-AND    u.id = us.ul_id
-ORDER BY date_demarrage_rcq asc
-`;
 
   return new Promise((resolve, reject) => {
     mysqlPool.query(queryStr, [],
