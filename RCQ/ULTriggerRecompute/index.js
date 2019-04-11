@@ -5,6 +5,8 @@ const {PubSub}  = require('@google-cloud/pubsub');
 const topicName       = 'ul_update';
 const pubsubClient    = new PubSub();
 
+const publishBetweenUlDelay = 400;
+
 
 function handleError(err){
   if (err && err.name === 'PartialFailureError') {
@@ -72,8 +74,8 @@ ORDER BY date_demarrage_rcq asc
       }
       else
       {
-        let logMessage = "Start processing UL array of size :"+results.length;
-        console.error(logMessage);
+        //let logMessage = "Start processing UL array of size :"+results.length;
+        //console.error(logMessage);
         if(results !== undefined && Array.isArray(results) && results.length >= 1)
         {
           let i=0;
@@ -96,12 +98,19 @@ ORDER BY date_demarrage_rcq asc
                          .catch(err=>{
                            handleError(err);
                          });
-                       }, i*400);
+                       }, i*publishBetweenUlDelay);
           });
 
           let logMessage = "Number of UL triggered for recomputed : "+i+" results size :"+results.length;
           console.error(logMessage);
-          resolve(logMessage);
+
+          //before returning resolve, we must wait for all the setTimeout to execute
+          //A cloud function can't exceed 9minutes of exec : 1350messages at 1msg every 400ms
+          setTimeout(function()
+           {
+             resolve(logMessage);
+           }, (i+5)*publishBetweenUlDelay);
+
         }
         else
         {
