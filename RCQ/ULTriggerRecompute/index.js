@@ -41,7 +41,7 @@ let mysqlPool;
 exports.ULTriggerRecompute = (req, res) => {
 
 
-  console.debug("start of processing");
+  console.error("start of processing");
   // Initialize the pool lazily, in case SQL access isn't needed for this
   // GCF instance. Doing so minimizes the number of active SQL connections,
   // which helps keep your GCF instances under SQL connection limits.
@@ -73,7 +73,7 @@ ORDER BY date_demarrage_rcq asc
       else
       {
         let logMessage = "Start processing UL array of size :"+results.length;
-        console.debug(logMessage);
+        console.error(logMessage);
         if(results !== undefined && Array.isArray(results) && results.length >= 1)
         {
           let i=0;
@@ -90,7 +90,7 @@ ORDER BY date_demarrage_rcq asc
                          .topic     (topicName)
                          .publish   (dataBuffer)
                          .then      ((data)=>{
-                           console.debug("Published 1 message on topic '"+topicName+"' "+JSON.stringify(ul) + " data:"+JSON.stringify(data));
+                           console.error("Published 1 message on topic '"+topicName+"' "+JSON.stringify(ul) + " data:"+JSON.stringify(data));
 
                          })
                          .catch(err=>{
@@ -100,7 +100,7 @@ ORDER BY date_demarrage_rcq asc
           });
 
           let logMessage = "Number of UL triggered for recomputed : "+i+" results size :"+results.length;
-          console.debug(logMessage);
+          console.error(logMessage);
           resolve(logMessage);
         }
         else
