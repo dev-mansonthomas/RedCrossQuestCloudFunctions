@@ -1,5 +1,5 @@
 const Firestore = require('@google-cloud/firestore');
-const firestore = new Firestore({ projectId:process.env.TARGET_PROJECT_ID});
+const firestore = new Firestore({projectId:process.env.TARGET_PROJECT_ID});
 
 /**
  * Responds to any HTTP request.
