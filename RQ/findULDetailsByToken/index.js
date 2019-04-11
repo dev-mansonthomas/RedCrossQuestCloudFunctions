@@ -91,7 +91,7 @@ exports.findULDetailsByToken = (req, res) => {
                         }
                         else
                         {
-                          console.log("query returned incorrect number of rows with token '"token+"'"+ JSON.stringify(results) );
+                          console.log("query returned incorrect number of rows with token '"+token+"'"+ JSON.stringify(results) );
                           res.status(200).send(JSON.stringify([]));
                         }
 
