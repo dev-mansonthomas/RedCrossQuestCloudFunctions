@@ -104,7 +104,7 @@ exports.ULQueteurStatsPerYear = (event, context) => {
     // Get a new write batch
     let batch = firestore.batch();
 
-    firestore.collection(path).listDocuments().then(val => {
+    return firestore.collection(path).listDocuments().then(val => {
       val.map((val) => {
         if(val.ul_id === ul_id)
         {
@@ -114,7 +114,7 @@ exports.ULQueteurStatsPerYear = (event, context) => {
       });
 
       return batch.commit();
-    })
+    });
   };
 
 
