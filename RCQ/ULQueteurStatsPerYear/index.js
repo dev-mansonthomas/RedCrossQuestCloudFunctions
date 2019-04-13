@@ -100,8 +100,9 @@ exports.ULQueteurStatsPerYear = (event, context) => {
   //delete current stats of the UL
   let deleteCollection = function(path)
   {
+    console.log("removing documents on collection '"+path+"' for ul_id="+ul_id);
     // Get a new write batch
-    var batch = firestore.batch();
+    let batch = firestore.batch();
 
     firestore.collection(path).listDocuments().then(val => {
       val.map((val) => {
@@ -118,7 +119,7 @@ exports.ULQueteurStatsPerYear = (event, context) => {
 
 
   //then inserting new one
-  return deleteCollection().then(
+  return deleteCollection("ULQueteurStatsPerYear").then(
     ()=>
     {
       return new Promise((resolve, reject) => {
