@@ -75,9 +75,9 @@ const queryStr = [
   '  q.first_name,',
   '  q.last_name, ',
   '  EXTRACT(YEAR from tq.depart) as year    ',
-  'from `tronc_queteur` as tq, ',
-  '     `queteur`       as q   ',
-  'where tq.ul_id      = ?              ',
+  'from `tronc_queteur` as tq,               ',
+  '     `queteur`       as q                 ',
+  'where tq.ul_id      = ?                   ',
   'AND   tq.queteur_id = q.id                ',
   'AND    q.active     = true                ',
   'AND   tq.deleted    = false               ',
@@ -88,7 +88,7 @@ exports.ULQueteurStatsPerYear = (event, context) => {
 
   const pubsubMessage = event.data;
   const parsedObject  = JSON.parse(Buffer.from(pubsubMessage, 'base64').toString());
-
+  const ul_id         = parsedObject.id;
   // Initialize the pool lazily, in case SQL access isn't needed for this
   // GCF instance. Doing so minimizes the number of active SQL connections,
   // which helps keep your GCF instances under SQL connection limits.
@@ -97,36 +97,64 @@ exports.ULQueteurStatsPerYear = (event, context) => {
     mysqlPool = mysql.createPool(mysqlConfig);
   }
 
-  return new Promise((resolve, reject) => {
-    mysqlPool.query(queryStr, [parsedObject.id],
-      (err, results) => {
-        if (err)
+  //delete current stats of the UL
+  let deleteCollection = function(path)
+  {
+    // Get a new write batch
+    var batch = firebase.firestore().batch();
+
+    firebase.firestore().collection(path).listDocuments().then(val => {
+      val.map((val) => {
+        if(val.ul_id === ul_id)
         {
-          console.error(err);
-          reject(err);
+          batch.delete(val)
         }
-        else
-        {
-          if(results !== undefined && Array.isArray(results) && results.length >= 1)
-          {
-            const batch       = firestore.batch();
-            const collection  = firestore.collection(fsCollectionName);
-            let i = 0;
-            results.forEach((rows) =>
-              {
-                const docRef = collection.doc();
-                batch.set(docRef, rows[i]);
-              });
 
-            batch.commit().then(() => {
-
-              let logMessage = "ULQueteurStatsPerYear for UL='"+parsedObject.name+"'("+parsedObject.id+") : "+i+" rows inserted";
-
-              console.log(logMessage);
-              resolve(logMessage);
-            });
-          }
-        }
       });
-  });
+
+      return batch.commit();
+    })
+  };
+
+
+  //then inserting new one
+  return deleteCollection().then(
+    ()=>
+    {
+      return new Promise((resolve, reject) => {
+        mysqlPool.query(queryStr, [ul_id],
+                        (err, results) => {
+                          if (err)
+                          {
+                            console.error(err);
+                            reject(err);
+                          }
+                          else
+                          {
+                            if(results !== undefined && Array.isArray(results) && results.length >= 1)
+                            {
+                              const batch       = firestore.batch();
+                              const collection  = firestore.collection(fsCollectionName);
+                              let i = 0;
+                              results.forEach((row) =>
+                                              {
+                                                console.log("ULQueteurStatsPerYear : inserting row for UL "+ul_id+" "+JSON.stringify(row));
+                                                const docRef = collection.doc();
+                                                batch.set(docRef, row);
+                                              });
+
+                              batch.commit().then(() => {
+
+                                let logMessage = "ULQueteurStatsPerYear for UL='"+parsedObject.name+"'("+ul_id+") : "+i+" rows inserted";
+
+                                console.log(logMessage);
+                                resolve(logMessage);
+                              });
+                            }
+                          }
+                        });
+      });
+
+    });
+
 };
