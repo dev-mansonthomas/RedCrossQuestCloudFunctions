@@ -2,7 +2,7 @@
 const mysql     = require('mysql');
 
 const {Firestore} = require('@google-cloud/firestore');
-const firestore   = new Firestore ();
+const firestore   = new Firestore ({projectId:process.env.TARGET_PROJECT_ID});
 const settings    = {timestampsInSnapshots: true};
 firestore.settings(settings);
 
