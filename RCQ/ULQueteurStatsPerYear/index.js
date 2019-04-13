@@ -70,7 +70,7 @@ const queryStr = [
   '    tq.cents2  * 3.06 +',
   '    tq.cent1   * 2.3)  ',
   '  ) as weight,         ',
-  '  SUM(DATETIME_DIFF(tq.retour , tq.depart, MINUTE)) as time_spent_in_minutes, ',
+  '  SUM(TIMESTAMPDIFF(MINUTE, tq.depart, tq.retour )) as time_spent_in_minutes, ',
   '  count(distinct(tq.point_quete_id)) as unique_point_quete_count, ',
   '  q.first_name,',
   '  q.last_name, ',
