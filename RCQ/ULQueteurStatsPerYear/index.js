@@ -101,9 +101,9 @@ exports.ULQueteurStatsPerYear = (event, context) => {
   let deleteCollection = function(path)
   {
     // Get a new write batch
-    var batch = firebase.firestore().batch();
+    var batch = firestore().batch();
 
-    firebase.firestore().collection(path).listDocuments().then(val => {
+    firestore().collection(path).listDocuments().then(val => {
       val.map((val) => {
         if(val.ul_id === ul_id)
         {
