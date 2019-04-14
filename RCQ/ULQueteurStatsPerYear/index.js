@@ -123,37 +123,40 @@ exports.ULQueteurStatsPerYear = (event, context) => {
     ()=>
     {
       return new Promise((resolve, reject) => {
-        mysqlPool.query(queryStr, [ul_id],
-                        (err, results) => {
-                          if (err)
-                          {
-                            console.error(err);
-                            reject(err);
-                          }
-                          else
-                          {
-                            if(results !== undefined && Array.isArray(results) && results.length >= 1)
-                            {
-                              const batch       = firestore.batch();
-                              const collection  = firestore.collection(fsCollectionName);
-                              let i = 0;
-                              results.forEach((row) =>
-                                              {
-                                                console.log("ULQueteurStatsPerYear : inserting row for UL "+ul_id+" "+JSON.stringify(row));
-                                                const docRef = collection.doc();
-                                                batch.set(docRef, JSON.stringify(row));
-                                              });
+        mysqlPool.query(
+          queryStr,
+          [ul_id],
+          (err, results) => {
+            if (err)
+            {
+              console.error(err);
+              reject(err);
+            }
+            else
+            {
+              if(results !== undefined && Array.isArray(results) && results.length >= 1)
+              {
+                const batch       = firestore.batch();
+                const collection  = firestore.collection(fsCollectionName);
+                let i = 0;
+                results.forEach(
+                  (row) =>
+                  {
+                    console.log("ULQueteurStatsPerYear : inserting row for UL "+ul_id+" "+JSON.stringify(row));
+                    const docRef = collection.doc();
+                    batch.set(docRef, row);
+                  });
 
-                              batch.commit().then(() => {
+                batch.commit().then(() => {
 
-                                let logMessage = "ULQueteurStatsPerYear for UL='"+parsedObject.name+"'("+ul_id+") : "+i+" rows inserted";
+                  let logMessage = "ULQueteurStatsPerYear for UL='"+parsedObject.name+"'("+ul_id+") : "+i+" rows inserted";
 
-                                console.log(logMessage);
-                                resolve(logMessage);
-                              });
-                            }
-                          }
-                        });
+                  console.log(logMessage);
+                  resolve(logMessage);
+                });
+              }
+            }
+          });
       });
 
     });
