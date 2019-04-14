@@ -142,12 +142,13 @@ exports.ULQueteurStatsPerYear = (event, context) => {
                 results.forEach(
                   (row) =>
                   {
-                    console.log("ULQueteurStatsPerYear : inserting row for UL "+ul_id+" "+JSON.stringify(row));
+                    //console.log("ULQueteurStatsPerYear : inserting row for UL "+ul_id+" "+JSON.stringify(row));
                     const docRef = collection.doc();
+                    //otherwise we get this error from firestore : Firestore doesn’t support JavaScript objects with custom prototypes (i.e. objects that were created via the “new” operator)
                     batch.set(docRef, JSON.parse(JSON.stringify(row)));
                   });
 
-                batch.commit().then(() => {
+                return batch.commit().then(() => {
 
                   let logMessage = "ULQueteurStatsPerYear for UL='"+parsedObject.name+"'("+ul_id+") : "+i+" rows inserted";
 
