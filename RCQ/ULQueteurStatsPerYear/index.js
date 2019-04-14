@@ -144,7 +144,7 @@ exports.ULQueteurStatsPerYear = (event, context) => {
                   {
                     console.log("ULQueteurStatsPerYear : inserting row for UL "+ul_id+" "+JSON.stringify(row));
                     const docRef = collection.doc();
-                    batch.set(docRef, row);
+                    batch.set(docRef, JSON.parse(JSON.stringify(row)));
                   });
 
                 batch.commit().then(() => {
