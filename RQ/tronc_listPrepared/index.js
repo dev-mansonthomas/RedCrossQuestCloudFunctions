@@ -59,7 +59,7 @@ const queryStr = [
 
 // [START findQueteurById]
 // retrieve Queteur Info from it's ID in RCQ DB
-exports.listPreparedTronc = functions.https.onCall((data, context) => {
+exports.tronc_listPrepared = functions.https.onCall((data, context) => {
   // [START_EXCLUDE]
   // [START readMessageData]
       //use only the user Id to retrieve it's queteur_id
