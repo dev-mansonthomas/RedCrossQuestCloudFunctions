@@ -1,0 +1,23 @@
+{
+  "name": "tronc_set_depart_or_retour",
+  "description": "Cloud Functions for Firebase",
+  "scripts": {
+    "lint": "eslint .",
+    "serve": "firebase serve --only functions",
+    "shell": "firebase experimental:functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "firebase-admin": "^7.2.0",
+    "firebase-functions": "^2.2.1",
+    "@google-cloud/firestore": "^1.2.0",
+    "mysql": "^2.16.0"
+  },
+  "devDependencies": {
+    "eslint": "^4.12.0",
+    "eslint-plugin-promise": "^3.6.0"
+  },
+  "private": true
+}
