@@ -102,9 +102,9 @@ exports.tronc_setDepartOrRetour = functions.https.onCall((data, context) => {
 
   let queryStr = queryTmpl.replace('column', isDepart?'depart':'retour');
   return firestore
-  .collection('queteurs')
-  .doc(uid)
-  .get()
+  .collection ('queteurs')
+  .doc        (uid)
+  .get        ()
   .then(queteurPromise => {
     if (queteurPromise.exists)
     {
@@ -132,8 +132,8 @@ exports.tronc_setDepartOrRetour = functions.https.onCall((data, context) => {
               else
               {
 
-                console.error(`Update Depart/Tronc (isDepart='${isDepart}') tqId='${tqId}', ulId='${ulId}' queteurId='${queteurId}' did not update the correct number of row (ie : 1) with query ${queryStr} ${results.affectedRows}`);
-                reject(JSON.stringify({success:false, message:`incorrect number of rows updated ${results.affectedRows}`}));
+                console.error(`Update Depart/Tronc (isDepart='${isDepart}') tqId='${tqId}', ulId='${ulId}' queteurId='${queteurId}' did not update the correct number of row (ie : 1) with query '${queryStr}' affectedRows: ${results.affectedRows} `+JSON.stringify([date, tqId, ulId, queteurId]));
+                reject(JSON.stringify({success:false, message:`incorrect number of rows updated: ${results.affectedRows}`}));
               }
             }
           });
