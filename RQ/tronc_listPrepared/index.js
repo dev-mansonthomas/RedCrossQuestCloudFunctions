@@ -136,7 +136,7 @@ exports.tronc_listPrepared = functions.https.onCall((data, context) => {
             }
             else
             {
-              if(results !== undefined && Array.isArray(results) && results.length > 1)
+              if(results !== undefined && Array.isArray(results) && results.length >= 1)
               {
                 console.debug("found preparedTronc for queteurwith id '"+queteurId+"' and ul_id='"+ulId+"' for firestore queteurs(uid='"+uid+"') : " +JSON.stringify(results));
                 resolve(JSON.stringify(results));
