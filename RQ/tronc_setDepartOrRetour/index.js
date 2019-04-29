@@ -124,7 +124,7 @@ exports.tronc_setDepartOrRetour = functions.https.onCall((data, context) => {
             }
             else
             {
-              if(results !== undefined && result.affectedRows === 1)
+              if(results !== undefined && results.affectedRows === 1)
               {
                 console.debug(`Update Depart/Tronc (isDepart='${isDepart}') tqId='${tqId}', ulId='${ulId}' queteurId='${queteurId}' did update one row with query ${queryStr}`);
                 resolve(JSON.stringify({success:true}));
