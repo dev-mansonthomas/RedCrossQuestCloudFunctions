@@ -143,7 +143,7 @@ exports.tronc_listPrepared = functions.https.onCall((data, context) => {
               }
               else
               {
-                console.error("no preparedTronc found for queteur with id '"+queteurId+"' and ul_id='"+ulId+"' for firestore queteurs(uid='"+uid+"')");
+                console.error("no preparedTronc found for queteur with id '"+queteurId+"' and ul_id='"+ulId+"' for firestore queteurs(uid='"+uid+"') "+JSON.stringify(results));
                 resolve(JSON.stringify([]));
               }
             }
