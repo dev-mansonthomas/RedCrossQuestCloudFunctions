@@ -52,6 +52,10 @@ const queryStr = [
   '    tq.don_cheque     +                                                                           ',
   '    tq.don_creditcard                                                                             ',
   '  ) as amount,                                                                                    ',
+  '  (select 	amount                                                                                 ',
+  '   from 		yearly_goal yg                                                                         ',
+  '   where 	yg.ul_id = tq.ul_id                                                                    ',
+  '   and 		year = EXTRACT(YEAR from max(tq.depart))) amount_year_objective,                       ',
   '  SUM((                                                                                           ',
   '    tq.euro500 * 1.1  +                                                                           ',
   '    tq.euro200 * 1.1  +                                                                           ',
@@ -83,14 +87,12 @@ const queryStr = [
   '  EXTRACT(YEAR from tq.depart) as year                                                            ',
   'from `tronc_queteur` as tq,                                                                       ',
   '     `queteur`       as q                                                                         ',
-  'where tq.ul_id      = @ul_id                                                                      ',
+  'where tq.ul_id      = 2                                                                           ',
   'AND   tq.queteur_id = q.id                                                                        ',
   'AND    q.active     = true                                                                        ',
   'AND   tq.deleted    = false                                                                       ',
   'AND   tq.comptage is not null                                                                     ',
-  'group by tq.ul_id, tq.queteur_id, q.first_name, q.last_name,  year                                ',
-  'order by year asc ;                                                                               '
-].join('\n');
+  'group by tq.ul_id, tq.queteur_id, q.first_name, q.last_name,  year                                '].join('\n');
 
 exports.ULQueteurStatsPerYear = (event, context) => {
 
