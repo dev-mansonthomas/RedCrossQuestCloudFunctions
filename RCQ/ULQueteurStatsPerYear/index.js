@@ -129,47 +129,6 @@ exports.ULQueteurStatsPerYear = (event, context) => {
 
 
   //then inserting new one
-  return deleteCollection("ULQueteurStatsPerYear").then(
-    ()=>
-    {
-      return new Promise((resolve, reject) => {
-        mysqlPool.query(
-          queryStr,
-          [ul_id],
-          (err, results) => {
-            if (err)
-            {
-              console.error(err);
-              reject(err);
-            }
-            else
-            {
-              if(results !== undefined && Array.isArray(results) && results.length >= 1)
-              {
-                const batch       = firestore.batch();
-                const collection  = firestore.collection(fsCollectionName);
-                let i = 0;
-                results.forEach(
-                  (row) =>
-                  {
-                    //console.log("ULQueteurStatsPerYear : inserting row for UL "+ul_id+" "+JSON.stringify(row));
-                    const docRef = collection.doc();
-                    //otherwise we get this error from firestore : Firestore doesn’t support JavaScript objects with custom prototypes (i.e. objects that were created via the “new” operator)
-                    batch.set(docRef, JSON.parse(JSON.stringify(row)));
-                  });
-
-                return batch.commit().then(() => {
-
-                  let logMessage = "ULQueteurStatsPerYear for UL='"+parsedObject.name+"'("+ul_id+") : "+i+" rows inserted";
-
-                  console.log(logMessage);
-                  resolve(logMessage);
-                });
-              }
-            }
-          });
-      });
-
-    });
+  return deleteCollection("ULQueteurStatsPerYear");
 
 };
