@@ -79,11 +79,12 @@ exports.ULTriggerRecompute = (event, context) => {
           results.forEach( (ul) => {
             i++;
             const dataBuffer    = Buffer.from(JSON.stringify(ul));
-
+            console.log("triggering "+JSON.stringify(ul));
             //TODO remove
-            if(ul.id !== 348)
+            if(ul.id != 348)
               return;
 
+            console.log("triggering UL 348");
             // in order to not hammer the MySQL instance
             // the publish on the topic is done every 400 secondes
             // by taking the index (i) * 400 as a delay for setTimeout
