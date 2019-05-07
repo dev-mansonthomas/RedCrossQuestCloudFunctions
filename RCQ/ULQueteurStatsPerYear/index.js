@@ -131,6 +131,6 @@ exports.ULQueteurStatsPerYear = (event, context) => {
 
 
   //then inserting new one
-  return deleteCollection("ULQueteurStatsPerYear");
+  return deleteCollection(fsCollectionName);
 
 };
