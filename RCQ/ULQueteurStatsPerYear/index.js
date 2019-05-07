@@ -112,9 +112,9 @@ exports.ULQueteurStatsPerYear = (event, context) => {
   {
     console.log("removing documents on collection '"+path+"' for ul_id="+ul_id);
     // Get a new write batch
-    let batch = firestore.batch();
+    let batch = firestore.batch();                                                    
 
-    return firestore.collection(path).where("ul_id", "==", 348).then(val => {
+    return firestore.collection(path).where("ul_id", "==", 348).get().then(val => {
       val.map((val) => {
         console.log("deleting "+JSON.stringify(val));
         batch.delete(val);
