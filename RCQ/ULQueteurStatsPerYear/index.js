@@ -52,10 +52,10 @@ const queryStr = [
   '    tq.don_cheque     +                                                                           ',
   '    tq.don_creditcard                                                                             ',
   '  ) as amount,                                                                                    ',
-  '  (select 	amount                                                                                 ',
-  '   from 		yearly_goal yg                                                                         ',
-  '   where 	yg.ul_id = tq.ul_id                                                                    ',
-  '   and 		year = EXTRACT(YEAR from max(tq.depart))) amount_year_objective,                       ',
+  '  (select  amount                                                                                 ',
+  '   from    yearly_goal yg                                                                         ',
+  '   where   yg.ul_id = tq.ul_id                                                                    ',
+  '   and     year = EXTRACT(YEAR from max(tq.depart))) amount_year_objective,                       ',
   '  SUM((                                                                                           ',
   '    tq.euro500 * 1.1  +                                                                           ',
   '    tq.euro200 * 1.1  +                                                                           ',
@@ -94,6 +94,7 @@ const queryStr = [
   'AND   tq.comptage is not null                                                                     ',
   'group by tq.ul_id, tq.queteur_id, q.first_name, q.last_name,  year                                '
 ].join('\n').replace(/ +/g," ");
+//remove multiple space to reduce string size for logging
 
 exports.ULQueteurStatsPerYear = (event, context) => {
 
@@ -113,22 +114,21 @@ exports.ULQueteurStatsPerYear = (event, context) => {
   {
     console.log("removing documents on collection '"+path+"' for ul_id="+ul_id);
     // Get a new write batch
-    let batch = firestore.batch();                                                    
+    let batch = firestore.batch();
 
     return firestore
       .collection(path)
       .where("ul_id", "==", ul_id)
       .get()
       .then(
-      querySnapshot => {
-        console.log(`Start of deletion : '${querySnapshot.size}'`);
-        querySnapshot.forEach(documentSnapshot => {
-          console.log(`Found ${querySnapshot.size} documents at ${documentSnapshot.ref.path}`);
-          batch.delete(documentSnapshot.ref);
+        querySnapshot => {
+          console.log(`Start of deletion : '${querySnapshot.size}' documents for UL '${ul_id}'`);
+          querySnapshot.forEach(documentSnapshot => {
+            batch.delete(documentSnapshot.ref);
+          });
+          console.log("commit of deletion for UL '${ul_id}'");
+          return batch.commit();
         });
-        console.log("commit of deletion");
-        return batch.commit();
-      });
   };
 
 
@@ -137,34 +137,26 @@ exports.ULQueteurStatsPerYear = (event, context) => {
     deleteCollection(fsCollectionName).then(
       ()=>
       {
-        console.log("running query for UL : "+ul_id);
         mysqlPool.query(
           queryStr,
           [ul_id],
           (err, results) => {
-            console.log(" query results part for query "+queryStr);
-            console.log(" error : "+JSON.stringify(err) );
-            console.log(" results : "+JSON.stringify(results) );
+
             if (err)
             {
-
               console.error(err);
               reject(err);
             }
             else
             {
-              console.log(" NO error '"+results !== undefined+"' '"+Array.isArray(results)+"' '"+results.length >= 1+"' " );
-              
               if(Array.isArray(results) && results.length >= 1)
               {
-                console.log("results "+ results.length);
                 const batch       = firestore.batch();
                 const collection  = firestore.collection(fsCollectionName);
                 let i = 0;
                 results.forEach(
                   (row) =>
                   {
-                    console.log("ULQueteurStatsPerYear : inserting row for UL "+ul_id+" "+JSON.stringify(row));
                     const docRef = collection.doc();
                     //otherwise we get this error from firestore : Firestore doesn’t support JavaScript objects with custom prototypes (i.e. objects that were created via the “new” operator)
                     batch.set(docRef, JSON.parse(JSON.stringify(row)));
@@ -181,9 +173,10 @@ exports.ULQueteurStatsPerYear = (event, context) => {
               }
               else
               {
-                console.log("query for UL '"+ul_id+"' returned no row "+queryStr+" results : "+JSON.stringify(results));
+                let logMessage = "query for UL '"+ul_id+"' returned no row "+queryStr+" results : "+JSON.stringify(results);
+                console.log(logMessage);
+                resolve(logMessage);
               }
-
             }
           });
       });
