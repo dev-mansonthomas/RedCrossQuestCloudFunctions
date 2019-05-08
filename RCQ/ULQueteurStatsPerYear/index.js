@@ -142,7 +142,7 @@ exports.ULQueteurStatsPerYear = (event, context) => {
           queryStr,
           [ul_id],
           (err, results) => {
-            console.log(" query results part ");
+            console.log(" query results part for query "+queryStr);
             console.log(" error : "+JSON.stringify(err) );
             console.log(" results : "+JSON.stringify(results) );
             if (err)
