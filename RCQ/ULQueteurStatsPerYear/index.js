@@ -145,13 +145,17 @@ exports.ULQueteurStatsPerYear = (event, context) => {
             console.log(" query results part" );
             if (err)
             {
+              console.log(" error" );
               console.error(err);
               reject(err);
             }
             else
             {
+              console.log(" NO error "+results !== undefined+" "+Array.isArray(results)+" "+results.length >= 1+" " );
+              
               if(results !== undefined && Array.isArray(results) && results.length >= 1)
               {
+                console.log("results "+ results.length);
                 const batch       = firestore.batch();
                 const collection  = firestore.collection(fsCollectionName);
                 let i = 0;
