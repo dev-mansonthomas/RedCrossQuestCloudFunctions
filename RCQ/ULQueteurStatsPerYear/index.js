@@ -120,7 +120,7 @@ exports.ULQueteurStatsPerYear = (event, context) => {
       .get()
       .then(
       querySnapshot => {
-        console.log("Start of deletion");
+        console.log(`Start of deletion : '${querySnapshot.size}'`);
         querySnapshot.forEach(documentSnapshot => {
           console.log(`Found ${querySnapshot.size} documents at ${documentSnapshot.ref.path}`);
           batch.delete(documentSnapshot.ref);
