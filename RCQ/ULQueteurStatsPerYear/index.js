@@ -93,7 +93,7 @@ const queryStr = [
   'AND   tq.deleted    = false                                                                       ',
   'AND   tq.comptage is not null                                                                     ',
   'group by tq.ul_id, tq.queteur_id, q.first_name, q.last_name,  year                                '
-].join('\n');
+].join('\n').replace(/ +/g," ");
 
 exports.ULQueteurStatsPerYear = (event, context) => {
 
@@ -155,7 +155,7 @@ exports.ULQueteurStatsPerYear = (event, context) => {
             {
               console.log(" NO error '"+results !== undefined+"' '"+Array.isArray(results)+"' '"+results.length >= 1+"' " );
               
-              if(results !== undefined && Array.isArray(results) && results.length >= 1)
+              if(Array.isArray(results) && results.length >= 1)
               {
                 console.log("results "+ results.length);
                 const batch       = firestore.batch();
@@ -179,6 +179,11 @@ exports.ULQueteurStatsPerYear = (event, context) => {
                   resolve(logMessage);
                 });
               }
+              else
+              {
+                console.log("query for UL '"+ul_id+"' returned no row "+queryStr+" results : "+JSON.stringify(results));
+              }
+
             }
           });
       });
