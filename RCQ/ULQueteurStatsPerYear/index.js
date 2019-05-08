@@ -87,7 +87,7 @@ const queryStr = [
   '  EXTRACT(YEAR from tq.depart) as year                                                            ',
   'from `tronc_queteur` as tq,                                                                       ',
   '     `queteur`       as q                                                                         ',
-  'where tq.ul_id      = @ul_id                                                                      ',
+  'where tq.ul_id      = ?                                                                           ',
   'AND   tq.queteur_id = q.id                                                                        ',
   'AND    q.active     = true                                                                        ',
   'AND   tq.deleted    = false                                                                       ',
