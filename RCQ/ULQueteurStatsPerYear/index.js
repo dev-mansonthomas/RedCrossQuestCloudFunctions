@@ -29,70 +29,7 @@ if (process.env.NODE_ENV === 'production') {
 let mysqlPool;
 
 const queryStr = [
-  'select                                                                                            ',
-  '  tq.ul_id,                                                                                       ',
-  '  tq.queteur_id,                                                                                  ',
-  '  count(1) tronc_count,                                                                           ',
-  '  SUM(                                                                                            ',
-  '    tq.euro2   * 2    +                                                                           ',
-  '    tq.euro1   * 1    +                                                                           ',
-  '    tq.cents50 * 0.5  +                                                                           ',
-  '    tq.cents20 * 0.2  +                                                                           ',
-  '    tq.cents10 * 0.1  +                                                                           ',
-  '    tq.cents5  * 0.05 +                                                                           ',
-  '    tq.cents2  * 0.02 +                                                                           ',
-  '    tq.cent1   * 0.01 +                                                                           ',
-  '    tq.euro5   * 5    +                                                                           ',
-  '    tq.euro10  * 10   +                                                                           ',
-  '    tq.euro20  * 20   +                                                                           ',
-  '    tq.euro50  * 50   +                                                                           ',
-  '    tq.euro100 * 100  +                                                                           ',
-  '    tq.euro200 * 200  +                                                                           ',
-  '    tq.euro500 * 500  +                                                                           ',
-  '    tq.don_cheque     +                                                                           ',
-  '    tq.don_creditcard                                                                             ',
-  '  ) as amount,                                                                                    ',
-  '  (select 	amount                                                                                 ',
-  '   from 		yearly_goal yg                                                                         ',
-  '   where 	yg.ul_id = tq.ul_id                                                                    ',
-  '   and 		year = EXTRACT(YEAR from max(tq.depart))) amount_year_objective,                       ',
-  '  SUM((                                                                                           ',
-  '    tq.euro500 * 1.1  +                                                                           ',
-  '    tq.euro200 * 1.1  +                                                                           ',
-  '    tq.euro100 * 1    +                                                                           ',
-  '    tq.euro50  * 0.9  +                                                                           ',
-  '    tq.euro20  * 0.8  +                                                                           ',
-  '    tq.euro10  * 0.7  +                                                                           ',
-  '    tq.euro5   * 0.6  +                                                                           ',
-  '    tq.euro2   * 8.5  +                                                                           ',
-  '    tq.euro1   * 7.5  +                                                                           ',
-  '    tq.cents50 * 7.8  +                                                                           ',
-  '    tq.cents20 * 5.74 +                                                                           ',
-  '    tq.cents10 * 4.1  +                                                                           ',
-  '    tq.cents5  * 3.92 +                                                                           ',
-  '    tq.cents2  * 3.06 +                                                                           ',
-  '    tq.cent1   * 2.3)                                                                             ',
-  '  ) as weight,                                                                                    ',
-  '  SUM(TIMESTAMPDIFF(MINUTE, tq.depart, tq.retour )) as time_spent_in_minutes,                     ',
-  '  count(distinct(tq.point_quete_id)) as unique_point_quete_count,                                 ',
-  '  count(1)                           as number_of_tronc_queteur,                                  ',
-  '  count(distinct(tq.point_quete_id)) as number_of_point_quete,                                    ',
-  '  (select count(1) from point_quete pq where pq.ul_id = tq.ul_id) as total_number_of_point_quete, ',
-  '  (select count(distinct(EXTRACT(DAY from tqq.depart)))                                           ',
-  '   from tronc_queteur tqq                                                                         ',
-  '   where tqq.queteur_id = tq.queteur_id                                                           ',
-  '   and EXTRACT(YEAR from tqq.depart) = EXTRACT(YEAR from tq.depart)) as number_of_days_quete,     ',
-  '  q.first_name,                                                                                   ',
-  '  q.last_name,                                                                                    ',
-  '  EXTRACT(YEAR from tq.depart) as year                                                            ',
-  'from `tronc_queteur` as tq,                                                                       ',
-  '     `queteur`       as q                                                                         ',
-  'where tq.ul_id      = @ul_id                                                                      ',
-  'AND   tq.queteur_id = q.id                                                                        ',
-  'AND    q.active     = true                                                                        ',
-  'AND   tq.deleted    = false                                                                       ',
-  'AND   tq.comptage is not null                                                                     ',
-  'group by tq.ul_id, tq.queteur_id, q.first_name, q.last_name,  year                                '].join('\n');
+  'SELECT NOW()'].join('\n');
 
 exports.ULQueteurStatsPerYear = (event, context) => {
 
@@ -141,7 +78,7 @@ exports.ULQueteurStatsPerYear = (event, context) => {
           queryStr,
           [ul_id],
           (err, results) => {
-
+            console.log(" query results part" );
             if (err)
             {
               console.error(err);
