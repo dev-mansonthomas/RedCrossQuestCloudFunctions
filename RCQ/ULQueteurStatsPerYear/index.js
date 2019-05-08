@@ -142,16 +142,18 @@ exports.ULQueteurStatsPerYear = (event, context) => {
           queryStr,
           [ul_id],
           (err, results) => {
-            console.log(" query results part" );
+            console.log(" query results part ");
+            console.log(" error : "+JSON.stringify(err) );
+            console.log(" results : "+JSON.stringify(results) );
             if (err)
             {
-              console.log(" error" );
+
               console.error(err);
               reject(err);
             }
             else
             {
-              console.log(" NO error "+results !== undefined+" "+Array.isArray(results)+" "+results.length >= 1+" " );
+              console.log(" NO error '"+results !== undefined+"' '"+Array.isArray(results)+"' '"+results.length >= 1+"' " );
               
               if(results !== undefined && Array.isArray(results) && results.length >= 1)
               {
