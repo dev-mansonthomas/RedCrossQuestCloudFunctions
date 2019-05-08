@@ -116,14 +116,16 @@ exports.ULQueteurStatsPerYear = (event, context) => {
 
     return firestore
       .collection(path)
-      .where("ul_id", "==", 348)
+      //.where("ul_id", "==", ul_id)
       .get()
       .then(
       querySnapshot => {
+        console.log("Start of deletion");
         querySnapshot.forEach(documentSnapshot => {
           console.log(`Found ${querySnapshot.size} documents at ${documentSnapshot.ref.path}`);
           batch.delete(documentSnapshot.ref);
         });
+        console.log("commit of deletion");
         return batch.commit();
       });
   };
