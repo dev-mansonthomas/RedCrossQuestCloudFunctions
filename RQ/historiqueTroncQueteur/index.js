@@ -178,7 +178,7 @@ exports.historiqueTroncQueteur = functions.https.onCall((data, context) => {
           )
           {// if the data is fresh enough, return the cached data
             console.log("historique tronc_queteur retrieved from cache "+JSON.stringify(queteurData));
-            resolve(historiqueTQLastUpdate);
+            resolve(historiqueTQ);
           }
           else
           {// cache miss or data too old
