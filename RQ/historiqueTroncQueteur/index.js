@@ -174,9 +174,9 @@ exports.historiqueTroncQueteur = functions.https.onCall((data, context) => {
 
           //console.log( JSON.stringify(historiqueTQLastUpdate)+);
           if( historiqueTQLastUpdate != null &&
-              moment(historiqueTQLastUpdate).diff(moment(), 'seconds') <= 5*60 &&
+              moment().diff(historiqueTQLastUpdate, 'seconds') <= 5*60 &&
               Array.isArray(historiqueTQ) &&
-             (historiqueTQ.length > 0 || moment(historiqueTQLastUpdate).diff(moment(), 'seconds') <= 60)
+             (historiqueTQ.length > 0 || moment().diff(historiqueTQLastUpdate, 'seconds') <= 60)
           )
           {// if the data is fresh enough, return the cached data
             console.log("historique tronc_queteur retrieved from cache "+JSON.stringify(queteurData));
