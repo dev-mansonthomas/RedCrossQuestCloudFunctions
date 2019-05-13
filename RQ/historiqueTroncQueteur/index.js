@@ -171,8 +171,10 @@ exports.historiqueTroncQueteur = functions.https.onCall((data, context) => {
 
           //Retrieve the data from cache if the lastUpdate date is not older than 5 minutes and the data store contains at least one element.
           //if 0 element, we'll allow update every minute
+
+          //console.log( JSON.stringify(historiqueTQLastUpdate)+);
           if( historiqueTQLastUpdate != null &&
-              moment(historiqueTQLastUpdate).diff(moment(), 'secondes') <= 5*60 &&
+              moment(historiqueTQLastUpdate).diff(moment(), 'seconds') <= 5*60 &&
               Array.isArray(historiqueTQ) &&
              (historiqueTQ.length > 0 || moment(historiqueTQLastUpdate).diff(moment(), 'secondes') <= 60)
           )
