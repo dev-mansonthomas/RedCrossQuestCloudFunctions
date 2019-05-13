@@ -1,5 +1,6 @@
 'use strict';
 const mysql     = require('mysql');
+const moment    = require('moment');
 
 const Firestore = require('@google-cloud/firestore');
 const firestore = new Firestore();
