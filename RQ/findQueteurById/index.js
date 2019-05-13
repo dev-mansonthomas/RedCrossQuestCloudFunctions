@@ -9,9 +9,6 @@ const admin     = require('firebase-admin');
 admin.initializeApp();
 
 
-
-
-
 const connectionName = process.env.INSTANCE_CONNECTION_NAME || null;
 const dbUser         = process.env.SQL_USER                 || null;
 const dbPassword     = process.env.SQL_PASSWORD             || null;
@@ -44,7 +41,6 @@ const queryStr = [
   '        q.`mobile`,                                      ',
   '        q.`created`,                                     ',
   '        q.`updated`,                                     ',
-  '        q.`notes`,                                       ',
   '        q.`ul_id`,                                       ',
   '        q.`active`,                                      ',
   '        q.`man`,                                         ',
@@ -53,9 +49,14 @@ const queryStr = [
   '        q.`referent_volunteer`,                          ',
   '        q.`anonymization_token`,                         ',
   '        q.`anonymization_date`,                          ',
-  '        u.`name`       as ul_name,                       ',
-  '        u.`latitude`   as ul_latitude,                   ',
-  '        u.`longitude`  as ul_longitude                   ',
+  '        u.`name`        as ul_name,                      ',
+  '        u.`latitude`    as ul_latitude,                  ',
+  '        u.`longitude`   as ul_longitude                  ',
+  '        u.`phone`       as ul_phone                      ',
+  '        u.`email`       as ul_email                      ',
+  '        u.`address`     as ul_address                    ',
+  '        u.`postal_code` as ul_postal_code                ',
+  '        u.`city`        as ul_city                       ',
   'FROM `queteur` as q,                                     ',
   '     `ul`      as u                                      ',
   'WHERE q.ul_id = u.id                                     ',
@@ -127,8 +128,8 @@ exports.findQueteurById = functions.https.onCall((data, context) => {
     if (queteurPromise.exists)
     {
       let queteurData = queteurPromise.data();
-      let queteurId = queteurData.queteur_id;
-      let ulId = queteurData.ul_id;
+      let queteurId   = queteurData.queteur_id;
+      let ulId        = queteurData.ul_id;
 
       return new Promise((resolve, reject) => {
         mysqlPool.query(
