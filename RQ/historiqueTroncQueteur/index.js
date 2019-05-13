@@ -198,7 +198,7 @@ exports.historiqueTroncQueteur = functions.https.onCall((data, context) => {
                 else
                 {
                   queteurRef.update({'historiqueTQ':results, 'historiqueTQLastUpdate': new Date()}).then(()=>{
-                    resolve(results);
+                    resolve(JSON.parse(JSON.stringify(results)));
                   }).catch(updateError=>{
                     console.error(updateError);
                     reject(updateError);
