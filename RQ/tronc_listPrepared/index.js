@@ -36,6 +36,7 @@ const queryStr = [
   '       tq.point_quete_id,            ',
   '       tq.tronc_id,                  ',
   '       tq.depart_theorique,          ',
+  '       tq.depart,                    ',
   '       pq.name,                      ',
   '       pq.latitude,                  ',
   '       pq.longitude,                 ',
