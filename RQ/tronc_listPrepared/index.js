@@ -54,11 +54,16 @@ const queryStr = [
   'AND   tq.ul_id            = ?        ',
   'AND   tq.queteur_id       = ?        ',
   'AND   tq.depart_theorique is not null',
-  'AND   tq.depart           is null    '].join('\n');
+  'AND                                  ',
+  '(                                    ',
+  '   tq.depart              is null    ',
+  '   OR                                ',
+  '   tq.retour              is null    ',
+  ')'].join('\n');
 
 
 // [START findQueteurById]
-// retrieve Queteur Info from it's ID in RCQ DB
+// retourne les troncs qui sont préparés
 exports.tronc_listPrepared = functions.https.onCall((data, context) => {
   // [START_EXCLUDE]
   // [START readMessageData]
