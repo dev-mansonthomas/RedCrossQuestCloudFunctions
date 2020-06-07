@@ -1,6 +1,11 @@
 {
   "name": "register_queteur",
   "description": "Cloud Functions for Firebase",
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dev-mansonthomas/RedCrossQuestCloudFunctions.git"
+  },
   "scripts": {
     "lint": "eslint .",
     "serve": "firebase serve --only functions",
@@ -10,14 +15,14 @@
     "logs": "firebase functions:log"
   },
   "dependencies": {
-    "firebase-admin": "^7.2.0",
-    "firebase-functions": "^2.2.1",
-    "mysql": "^2.16.0",
-    "uuid": "^3.3.2"
+    "firebase-admin": "^8.12.1",
+    "firebase-functions": "^3.6.2",
+    "mysql": "^2.18.1",
+    "uuid": "^8.1.0"
   },
   "devDependencies": {
-    "eslint": "^5.16.0",
-    "eslint-plugin-promise": "^4.1.1"
+    "eslint": "^7.2.0",
+    "eslint-plugin-promise": "^4.2.1"
   },
   "private": true
 }

@@ -4,10 +4,12 @@ const firestore = new Firestore({projectId:process.env.TARGET_PROJECT_ID});
 /**
  * Responds to any HTTP request.
  *
+ * Check if RQ Firestore is reachable from RCQ
+ *
  * @param {!express:Request} req HTTP request context.
  * @param {!express:Response} res HTTP response context.
  */
-exports.z_testCrossProjectFirestoreConnectivity = (req, res) => {
+exports.ztestCrossProjectFirestoCx = (req, res) => {
 
   return firestore
   .collection('queteurs')

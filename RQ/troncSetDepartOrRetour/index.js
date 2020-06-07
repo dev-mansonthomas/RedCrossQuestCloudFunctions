@@ -40,8 +40,11 @@ const queryTmpl = [
 
 
 // [START findQueteurById]
-// retrieve Queteur Info from it's ID in RCQ DB
-exports.tronc_setDepartOrRetour = functions.https.onCall((data, context) => {
+/**
+ update troncQueteur with date depart or retour in RCQ MySQL
+ it retrieves queteurId & UL_ID from firestore and then query RCQ MySQL
+ * */
+exports.troncSetDepartOrRetour = functions.https.onCall((data, context) => {
   // [START_EXCLUDE]
   // [START readMessageData]
       //use only the user Id to retrieve it's queteur_id

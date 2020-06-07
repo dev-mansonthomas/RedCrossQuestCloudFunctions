@@ -95,6 +95,18 @@ const queryStr = [
 ].join('\n').replace(/ +/g," ");
 //remove multiple space to reduce string size for logging
 
+
+/***
+ * Cloud Scheduler "trigger_ul_update" publish an empty message on "trigger_ul_update"
+ * ULTriggerRecompute Cloud Function is listening, on reception it will trigger stats recompute every 400ms
+ * which call this cloud function.
+ *
+ * Requires :
+ * roles/cloudsql.client (ou roles/cloudsql.viewer)
+ * roles/datastore.user on RQ Firestore
+ *
+ *
+ * */
 exports.ULQueteurStatsPerYear = (event, context) => {
 
   const pubsubMessage = event.data;

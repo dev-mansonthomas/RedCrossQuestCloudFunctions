@@ -2,8 +2,13 @@
   "name": "queteurCurrentYearAmountTimeWeigthAllTheTime",
   "version": "0.0.1",
   "dependencies": {
-    "@google-cloud/pubsub": "^0.22.0",
-    "@google-cloud/bigquery": "^2.0.0",
-    "@google-cloud/firestore": "^0.19.0"
+    "@google-cloud/bigquery": "^4.7.0",
+    "@google-cloud/firestore": "^3.8.4",
+    "@google-cloud/pubsub": "^2.1.0"
+  },
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dev-mansonthomas/RedCrossQuestCloudFunctions.git"
   }
 }

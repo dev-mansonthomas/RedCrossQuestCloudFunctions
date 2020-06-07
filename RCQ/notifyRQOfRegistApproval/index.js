@@ -2,13 +2,27 @@ const Firestore = require('@google-cloud/firestore');
 const firestore = new Firestore({projectId:process.env.TARGET_PROJECT_ID});
 
 /**
+ * Search in RedQuest Firestore for the queteur with it registration UUID
+ * Then Update the queteur to set the Approval/Rejection of registration
+ * If Approved, set the QueteurId, ULID, Secteur
+ *
  * Triggered from a message on a Cloud Pub/Sub topic.
- * Update an existing TroncQueteur with new data
+ * Topic : $this->settings['PubSub']['queteur_approval_topic'] (RCQ)
+ *
+ $messageProperties  = [
+ 'ulId'          => "".$ulId,
+ 'uId'           => "".$userId,
+ 'queteurId'     => "".$queteurEntity->id,
+ 'registrationId'=> "".$queteurEntity->registration_id
+ ];
+   Data : QueteurEntity
+ *
+ * Privileges : roles/datastore.user
  *
  * @param {!Object} event Event payload.
  * @param {!Object} context Metadata for the event.
  */
-exports.notifyRedQuestOfRegistrationApproval = (event, context) => {
+exports.notifyRQOfRegistApproval = (event, context) => {
   const pubsubMessage = event.data;
   const parsedObject  = JSON.parse(Buffer.from(pubsubMessage, 'base64').toString());
 

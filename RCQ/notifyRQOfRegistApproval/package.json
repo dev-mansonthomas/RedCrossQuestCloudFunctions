@@ -1,10 +1,8 @@
 {
-  "name": "ul-ranking-by-amount-current-year",
-  "version": "0.0.1",
+  "name": "notify_red_quest_of_registration_approval",
+  "version": "0.0.2",
   "dependencies": {
-    "@google-cloud/bigquery": "^4.7.0",
-    "@google-cloud/firestore": "^3.8.4",
-    "@google-cloud/pubsub": "^2.1.0"
+    "@google-cloud/firestore": "^3.8.4"
   },
   "license": "GPL-3.0-or-later",
   "repository": {

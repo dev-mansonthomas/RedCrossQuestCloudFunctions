@@ -22,7 +22,7 @@ function handleError(err){
 
 /**
  * Triggered from a message on a Cloud Pub/Sub topic.
- *
+ * NOT USED
  * @param {!Object} event Event payload.
  * @param {!Object} context Metadata for the event.
  */

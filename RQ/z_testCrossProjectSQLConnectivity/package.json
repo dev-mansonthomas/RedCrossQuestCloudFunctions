@@ -1,7 +1,0 @@
-{
-  "name": "test-cross-project-sql-connectivity",
-  "version": "0.0.1",
-  "dependencies": {
-    "mysql": "^2.16.0"
-  }
-}

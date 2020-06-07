@@ -22,7 +22,7 @@ let mysqlPool;
 
 
 
-exports.z_testCrossProjectSQLConnectivity = (req, res) => {
+exports.ztestCrossProjectSQLCx = (req, res) => {
 
   // Initialize the pool lazily, in case SQL access isn't needed for this
   // GCF instance. Doing so minimizes the number of active SQL connections,

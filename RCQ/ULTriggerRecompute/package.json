@@ -3,7 +3,12 @@
   "description": "google scheduler will trigger this function every X minutes. This function will query MySQL for all UL that uses RCQ, and post on ul_update topic, so that metrics are being computed.",
   "version": "0.0.1",
   "dependencies": {
-    "mysql": "^2.16.0",
-    "@google-cloud/pubsub": "^0.28.1"
+    "mysql": "^2.18.1",
+    "@google-cloud/pubsub": "^2.1.0"
+  },
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dev-mansonthomas/RedCrossQuestCloudFunctions.git"
   }
 }

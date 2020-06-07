@@ -2,7 +2,12 @@
   "name": "ul-queteur-stats-per-year",
   "version": "0.0.1",
   "dependencies": {
-    "mysql": "^2.16.0",
-    "@google-cloud/firestore": "^1.2.0"
+    "mysql": "^2.18.1",
+    "@google-cloud/firestore": "^3.8.4"
+  },
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dev-mansonthomas/RedCrossQuestCloudFunctions.git"
   }
 }

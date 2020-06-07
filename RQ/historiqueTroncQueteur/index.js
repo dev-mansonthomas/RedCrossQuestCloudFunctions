@@ -96,7 +96,14 @@ const queryStr = [
 
 
 // [START findQueteurById]
-// retrieve Queteur Info from it's ID in RCQ DB
+/**
+ * Retrieve the tronc_queteurs list from MySQL with a cache in firestore with TTL of 5minutes,
+ * unless there's no rows, and the check in DB is allowed every minute in this case
+ *
+ * Permissions :
+ * firestore read/write
+ * MySQL read
+ * */
 exports.historiqueTroncQueteur = functions.https.onCall((data, context) => {
   // [START_EXCLUDE]
   // [START readMessageData]

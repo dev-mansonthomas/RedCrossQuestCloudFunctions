@@ -64,9 +64,16 @@ const queryStr = [
   'AND   q.id    = ?                                        '].join('\n');
 
 
+/**
+ * Retrieve a Queteur by its ID & UL_ID which are retrieved from firestore from the firebase ID
+ * firestore read
+ * mysql read
+ *
+ * **/
+
 // [START findQueteurById]
 // retrieve Queteur Info from it's ID in RCQ DB
-exports.findQueteurById = functions.https.onCall((data, context) => {
+exports.findQueteurById = functions.https.onCall( (data, context) => {
   // [START_EXCLUDE]
   // [START readMessageData]
       //use only the user Id to retrieve it's queteur_id

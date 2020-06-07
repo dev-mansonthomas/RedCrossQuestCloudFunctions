@@ -49,7 +49,13 @@ AND    u.id = us.ul_id
 ORDER BY date_demarrage_rcq asc
 `;
 
-exports.ULTriggerRecompute = (event, context) => {
+/**
+ * Cloud Scheduler "trigger_ul_update" publish an empty message on "trigger_ul_update"
+ * This function : ULTriggerRecompute Cloud Function is listening
+ *
+ * roles :  roles/cloudsql.client
+ **/
+exports.ULTriggerRecompute = async (event, context) => {
 
 
   console.error("start of processing");

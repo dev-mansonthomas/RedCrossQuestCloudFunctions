@@ -1,7 +1,12 @@
 {
   "name": "find_ul_details_by_token",
   "version": "0.0.1",
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dev-mansonthomas/RedCrossQuestCloudFunctions.git"
+  },
   "dependencies": {
-    "mysql": "^2.16.0"
+    "mysql": "^2.18.1"
   }
 }

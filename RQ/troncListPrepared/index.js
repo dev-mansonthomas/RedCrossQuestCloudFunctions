@@ -64,8 +64,9 @@ const queryStr = [
 
 
 // [START findQueteurById]
-// retourne les troncs qui sont préparés
-exports.tronc_listPrepared = functions.https.onCall((data, context) => {
+// Return a troncQueteur if exist that is in prepared state (depart_théorique not null and depart null)
+// it retrieves queteurId & UL_ID from firestore and then query RCQ MySQL
+exports.troncListPrepared = functions.https.onCall((data, context) => {
   // [START_EXCLUDE]
   // [START readMessageData]
       //use only the user Id to retrieve it's queteur_id

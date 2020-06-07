@@ -48,7 +48,9 @@ const queryStr = [
 
 
 /**
- * Retrieve UL details by its registration token
+ * Retrieve UL details by its registration token  from RCQ MySQL
+ *
+ * MySQL read
  *
  * @param {!express:Request} req HTTP request context.
  *        specify a token variable with the token value

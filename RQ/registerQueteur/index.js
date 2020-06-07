@@ -35,7 +35,11 @@ VALUES
 ( ?,?,?,?,?,?,?,?,NOW(),?,?)
 `;
 
-
+/**
+ * Insert a registration into RCQ MySQL DB
+ *
+ * Permissions : MySQL Write
+ * */
 exports.registerQueteur = functions.https.onCall((data, context) => {
 
   if (!context.auth)
