@@ -1,8 +1,8 @@
 'use strict';
-const mysql     = require('mysql');
-const functions = require('firebase-functions');
-const admin     = require('firebase-admin');
-const uuidv4    = require('uuid/v4');
+const mysql          = require('mysql');
+const functions      = require('firebase-functions');
+const admin          = require('firebase-admin');
+const { v4: uuidv4 } = require('uuid');
 admin.initializeApp();
 
 
