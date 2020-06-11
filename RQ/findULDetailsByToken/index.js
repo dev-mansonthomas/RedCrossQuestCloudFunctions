@@ -1,6 +1,6 @@
 'use strict';
 const mysql     = require('mysql');
-require('common');
+const common    = require('common');
 
 const queryStr = `
   SELECT  us.id as settings_id,       
@@ -39,11 +39,13 @@ const queryStr = `
 
  * @param {!express:Response} res HTTP response context.
  */
-exports.findULDetailsByToken = (req, res) => {
+exports.findULDetailsByToken = async (req, res) => {
   res.set('Access-Control-Allow-Origin', "*");
   res.set('Access-Control-Allow-Methods', 'GET, POST');
   let token  = req.query.token;
   let params = {};
+
+  mysqlPool = await common.initMySQL('MYSQL_USER_READ');
 
  if(
    !( token         !== undefined &&
