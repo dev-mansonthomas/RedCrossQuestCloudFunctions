@@ -8,13 +8,15 @@
     "url": "git+https://github.com/dev-mansonthomas/RedCrossQuestCloudFunctions.git"
   },
   "dependencies": {
-    "firebase-admin": "^8.12.1",
-    "firebase-functions": "^3.6.2",
     "@google-cloud/firestore": "^3.8.4",
     "@google-cloud/pubsub": "^2.1.0",
+    "@google-cloud/secret-manager": "^3.0.0",
+    "google-auth-library": "^6.0.1",
+    "firebase-admin": "^8.12.1",
+    "firebase-functions": "^3.6.2",
+    "moment": "^2.26.0",
     "mysql": "^2.18.1",
-    "uuid": "^8.1.0",
-    "moment": "^2.26.0"
+    "uuid": "^8.1.0"
   },
   "devDependencies": {
     "eslint": "^7.2.0",

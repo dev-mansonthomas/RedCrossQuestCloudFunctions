@@ -18,7 +18,8 @@
     "firebase-admin": "^8.12.1",
     "firebase-functions": "^3.6.2",
     "mysql": "^2.18.1",
-    "uuid": "^8.1.0"
+    "uuid": "^8.1.0",
+    "@google-cloud/secret-manager": "^3.0.0"
   },
   "devDependencies": {
     "eslint": "^7.2.0",

@@ -31,68 +31,69 @@ let mysqlPool;
 
 
 
-const queryStr = [
-  'SELECT                                ',
-  '  tq.id,                              ',
-  '  tq.point_quete_id,                  ',
-  '  pq.name as point_quete,             ',
-  '  tq.tronc_id,                        ',
-  '  tq.depart_theorique,                ',
-  '  tq.depart,                          ',
-  '  tq.retour,                          ',
-  '  tq.comptage,                        ',
-  '  (tq.euro2*2     +                   ',
-  '   tq.euro1*1     +                   ',
-  '   tq.cents50*0.5 +                   ',
-  '   tq.cents20*0.2 +                   ',
-  '   tq.cents10*0.1 +                   ',
-  '   tq.cents5*0.05 +                   ',
-  '   tq.cents2*0.02 +                   ',
-  '   tq.cent1*0.01  +                   ',
-  '   tq.euro5*5     +                   ',
-  '   tq.euro10*10   +                   ',
-  '   tq.euro20*20   +                   ',
-  '   tq.euro50*50   +                   ',
-  '   tq.euro100*100 +                   ',
-  '   tq.euro200*200 +                   ',
-  '   tq.euro500*500 +                   ',
-  '   tq.don_cheque  +                   ',
-  '   tq.don_creditcard                  ',
-  '  ) as amount,                        ',
-  '  ( tq.euro500 * 1.1  +               ',
-  '   tq.euro200  * 1.1  +               ',
-  '   tq.euro100  * 1    +               ',
-  '   tq.euro50   * 0.9  +               ',
-  '   tq.euro20   * 0.8  +               ',
-  '   tq.euro10   * 0.7  +               ',
-  '   tq.euro5    * 0.6  +               ',
-  '   tq.euro2    * 8.5  +               ',
-  '   tq.euro1    * 7.5  +               ',
-  '   tq.cents50  * 7.8  +               ',
-  '   tq.cents20  * 5.74 +               ',
-  '   tq.cents10  * 4.1  +               ',
-  '   tq.cents5   * 3.92 +               ',
-  '   tq.cents2   * 3.06 +               ',
-  '   tq.cent1    * 2.3                  ',
-  '  ) as weight,                        ',
-  '  (timestampdiff(                     ',
-  '    second,                           ',
-  '    depart,                           ',
-  '    retour))/3600                     ',
-  '    as time_spent_in_hours,           ',
-  '  tq.don_creditcard,                  ',
-  '  tq.don_cheque                       ',
-  '  FROM tronc_queteur as tq,           ',
-  '       point_quete   as pq,           ',
-  '       queteur       as q             ',
-  'WHERE  q.id             = ?           ',
-  'AND   tq.queteur_id     = q.id        ',
-  'AND    q.ul_id          = ?           ',
-  'AND   tq.point_quete_id = pq.id       ',
-  'AND   YEAR(tq.depart)   = YEAR(NOW()) ',
-  'AND   tq.comptage       IS NOT NULL   ',
-  'AND   tq.deleted        = 0           ',
-  'ORDER BY tq.id DESC;                  '].join('\n');
+const queryStr = `
+  SELECT                                
+    tq.id,                              
+    tq.point_quete_id,                  
+    pq.name as point_quete,             
+    tq.tronc_id,                        
+    tq.depart_theorique,                
+    tq.depart,                          
+    tq.retour,                          
+    tq.comptage,                        
+    (tq.euro2*2     +                   
+     tq.euro1*1     +                   
+     tq.cents50*0.5 +                   
+     tq.cents20*0.2 +                   
+     tq.cents10*0.1 +                   
+     tq.cents5*0.05 +                   
+     tq.cents2*0.02 +                   
+     tq.cent1*0.01  +                   
+     tq.euro5*5     +                   
+     tq.euro10*10   +                   
+     tq.euro20*20   +                   
+     tq.euro50*50   +                   
+     tq.euro100*100 +                   
+     tq.euro200*200 +                   
+     tq.euro500*500 +                   
+     tq.don_cheque  +                   
+     tq.don_creditcard                  
+    ) as amount,                        
+    ( tq.euro500 * 1.1  +               
+     tq.euro200  * 1.1  +               
+     tq.euro100  * 1    +               
+     tq.euro50   * 0.9  +               
+     tq.euro20   * 0.8  +               
+     tq.euro10   * 0.7  +               
+     tq.euro5    * 0.6  +               
+     tq.euro2    * 8.5  +               
+     tq.euro1    * 7.5  +               
+     tq.cents50  * 7.8  +               
+     tq.cents20  * 5.74 +               
+     tq.cents10  * 4.1  +               
+     tq.cents5   * 3.92 +               
+     tq.cents2   * 3.06 +               
+     tq.cent1    * 2.3                  
+    ) as weight,                        
+    (timestampdiff(                     
+      second,                           
+      depart,                           
+      retour))/3600                     
+      as time_spent_in_hours,           
+    tq.don_creditcard,                  
+    tq.don_cheque                       
+    FROM tronc_queteur as tq,           
+         point_quete   as pq,           
+         queteur       as q             
+  WHERE  q.id             = ?           
+  AND   tq.queteur_id     = q.id        
+  AND    q.ul_id          = ?           
+  AND   tq.point_quete_id = pq.id       
+  AND   YEAR(tq.depart)   = YEAR(NOW()) 
+  AND   tq.comptage       IS NOT NULL   
+  AND   tq.deleted        = 0           
+  ORDER BY tq.id DESC;                  
+`;
 
 
 // [START findQueteurById]

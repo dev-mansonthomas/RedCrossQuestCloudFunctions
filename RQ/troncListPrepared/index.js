@@ -1,5 +1,6 @@
 'use strict';
 const mysql     = require('mysql');
+require('common');
 
 const Firestore = require('@google-cloud/firestore');
 const firestore = new Firestore();
@@ -8,59 +9,38 @@ const functions = require('firebase-functions');
 const admin     = require('firebase-admin');
 admin.initializeApp();
 
-const connectionName = process.env.INSTANCE_CONNECTION_NAME || null;
-const dbUser         = process.env.SQL_USER                 || null;
-const dbPassword     = process.env.SQL_PASSWORD             || null;
-const dbName         = process.env.SQL_DB_NAME              || null;
-
-
-const mysqlConfig = {
-  connectionLimit : 1,
-  user            : dbUser,
-  password        : dbPassword,
-  database        : dbName,
-};
-if (process.env.NODE_ENV === 'production') {
-  mysqlConfig.socketPath = `/cloudsql/${connectionName}`;
-}
-
-// Connection pools reuse connections between invocations,
-// and handle dropped or expired connections automatically.
-let mysqlPool;
-
-
-
-const queryStr = [
-  'SELECT tq.id as tronc_queteur_id,    ',
-  '       tq.queteur_id,                ',
-  '       tq.point_quete_id,            ',
-  '       tq.tronc_id,                  ',
-  '       tq.depart_theorique,          ',
-  '       tq.depart,                    ',
-  '       pq.name,                      ',
-  '       pq.latitude,                  ',
-  '       pq.longitude,                 ',
-  '       pq.address,                   ',
-  '       pq.postal_code,               ',
-  '       pq.city,                      ',
-  '       pq.advice,                    ',
-  '       pq.localization               ',
-  'FROM   tronc_queteur   tq,           ',
-  '        queteur         q,           ',
-  '        point_quete    pq            ',
-  'WHERE tq.queteur_id       = q.id     ',
-  'AND   tq.point_quete_id   = pq.id    ',
-  'AND    q.active           = 1        ',
-  'AND   tq.deleted          = false    ',
-  'AND   tq.ul_id            = ?        ',
-  'AND   tq.queteur_id       = ?        ',
-  'AND   tq.depart_theorique is not null',
-  'AND                                  ',
-  '(                                    ',
-  '   tq.depart              is null    ',
-  '   OR                                ',
-  '   tq.retour              is null    ',
-  ')'].join('\n');
+const queryStr = `
+  SELECT tq.id as tronc_queteur_id,    
+         tq.queteur_id,                
+         tq.point_quete_id,            
+         tq.tronc_id,                  
+         tq.depart_theorique,          
+         tq.depart,                    
+         pq.name,                      
+         pq.latitude,                  
+         pq.longitude,                 
+         pq.address,                   
+         pq.postal_code,               
+         pq.city,                      
+         pq.advice,                    
+         pq.localization               
+  FROM   tronc_queteur   tq,           
+          queteur         q,           
+          point_quete    pq            
+  WHERE tq.queteur_id       = q.id     
+  AND   tq.point_quete_id   = pq.id    
+  AND    q.active           = 1        
+  AND   tq.deleted          = false    
+  AND   tq.ul_id            = ?        
+  AND   tq.queteur_id       = ?        
+  AND   tq.depart_theorique is not null
+  AND                                  
+  (                                    
+     tq.depart              is null    
+     OR                                
+     tq.retour              is null    
+  )
+`;
 
 
 // [START findQueteurById]
@@ -83,28 +63,7 @@ exports.troncListPrepared = functions.https.onCall((data, context) => {
   // Initialize the pool lazily, in case SQL access isn't needed for this
   // GCF instance. Doing so minimizes the number of active SQL connections,
   // which helps keep your GCF instances under SQL connection limits.
-  if (!mysqlPool)
-  {
-
-    if(connectionName === null)
-    {
-      throw new functions.https.HttpsError('internal', 'env var not defined : INSTANCE_CONNECTION_NAME');
-    }
-    if(dbUser         === null)
-    {
-      throw new functions.https.HttpsError('internal', 'env var not defined : SQL_USER'                );
-    }
-    if(dbPassword     === null)
-    {
-      throw new functions.https.HttpsError('internal', 'env var not defined : SQL_PASSWORD'            );
-    }
-    if( dbName        === null)
-    {
-      throw new functions.https.HttpsError('internal', 'env var not defined : SQL_DB_NAME'             );
-    }
-
-    mysqlPool = mysql.createPool(mysqlConfig);
-  }
+  initMySQL('MYSQL_USER_READ');
 
   // [END messageHttpsErrors]
 

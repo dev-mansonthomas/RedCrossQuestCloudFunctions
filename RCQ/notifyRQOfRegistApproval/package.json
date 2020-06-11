@@ -1,8 +1,10 @@
 {
   "name": "notify_red_quest_of_registration_approval",
+  "description": "Update RedQuest Firebase with the approval decision on the queteur registration",
   "version": "0.0.2",
   "dependencies": {
-    "@google-cloud/firestore": "^3.8.4"
+    "@google-cloud/firestore": "^3.8.4",
+    "google-auth-library": "^6.0.1"
   },
   "license": "GPL-3.0-or-later",
   "repository": {

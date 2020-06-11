@@ -20,18 +20,7 @@ if (process.env.NODE_ENV === 'production') {
 // and handle dropped or expired connections automatically.
 let mysqlPool;
 
-
-
 exports.ztestCrossProjectSQLCx = (req, res) => {
-
-  // Initialize the pool lazily, in case SQL access isn't needed for this
-  // GCF instance. Doing so minimizes the number of active SQL connections,
-  // which helps keep your GCF instances under SQL connection limits.
-  if (!mysqlPool)
-  {
-    mysqlPool = mysql.createPool(mysqlConfig);
-  }
-
 
   const queryStr = `
 select count(1) as nb_tq

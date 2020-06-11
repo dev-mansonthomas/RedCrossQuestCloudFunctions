@@ -30,13 +30,14 @@ let mysqlPool;
 
 
 
-const queryTmpl = [
-  'UPDATE tronc_queteur     ',
-  'SET    column     = ?    ',
-  'WHERE  id         = ?    ',
-  'AND    ul_id      = ?    ',
-  'AND    queteur_id = ?    ',
-  'AND    deleted    = false'].join('\n');
+const queryTmpl = `
+  UPDATE tronc_queteur     
+  SET    column     = ?    
+  WHERE  id         = ?    
+  AND    ul_id      = ?    
+  AND    queteur_id = ?
+  AND    deleted    = false
+`;
 
 
 // [START findQueteurById]
@@ -52,7 +53,7 @@ exports.troncSetDepartOrRetour = functions.https.onCall((data, context) => {
   // [START messageHttpsErrors]
 
   // Checking that the user is authenticated.
-  if (!context.auth)
+  if(!context.auth)
   {
     // Throwing an HttpsError so that the client gets the error details.
     throw new functions.https.HttpsError('failed-precondition', 'The function must be called while authenticated.');

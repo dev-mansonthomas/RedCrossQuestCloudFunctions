@@ -1,8 +1,10 @@
 {
   "name": "test-cross-project-firestore-connectivity",
+  "description": "Test connectivity to RQ firestore from RCQ projects",
   "version": "0.0.1",
   "dependencies": {
-    "@google-cloud/firestore": "^3.8.4"
+    "@google-cloud/firestore": "^3.8.4",
+    "google-auth-library": "^6.0.1"
   },
   "license": "GPL-3.0-or-later",
   "repository": {
