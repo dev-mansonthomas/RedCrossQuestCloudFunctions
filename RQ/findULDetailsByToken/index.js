@@ -1,6 +1,6 @@
 'use strict';
 const mysql     = require('mysql');
-const common    = require('common');
+const common    = require('./common');
 
 const queryStr = `
   SELECT  us.id as settings_id,       

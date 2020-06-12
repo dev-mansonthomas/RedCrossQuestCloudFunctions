@@ -51,8 +51,8 @@ module.exports = {
     return mysqlPool;
   },
   getSecret: async (secretName: string): Promise<T> => {
-  // Access the secret.
-  const [accessResponse] = await secretManagerServiceClient.accessSecretVersion({name: secretName});
-  return accessResponse.payload.data.toString('utf8');
+    // Access the secret.
+    const [accessResponse] = await secretManagerServiceClient.accessSecretVersion({name: secretName});
+    return accessResponse.payload.data.toString('utf8');
   }
 };
