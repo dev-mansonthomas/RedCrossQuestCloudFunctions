@@ -1,7 +1,7 @@
 'use strict';
-const mysql     = require('mysql');
+const mysql                        = require('mysql');
 const {SecretManagerServiceClient} = require('@google-cloud/secret-manager');
-const secretManagerServiceClient = new SecretManagerServiceClient();
+const secretManagerServiceClient   = new SecretManagerServiceClient();
 
 const connectionName = process.env.INSTANCE_CONNECTION_NAME || null;
 const dbUser         = process.env.SQL_USER                 || null;
@@ -35,7 +35,7 @@ if (process.env.NODE_ENV === 'production') {
 let mysqlPool;
 
 //: Promise<T>
-async function initMySQL(secretName: string) {
+async function initMySQL(secretName) {
 // Initialize the pool lazily, in case SQL access isn't needed for this
   // GCF instance. Doing so minimizes the number of active SQL connections,
   // which helps keep your GCF instances under SQL connection limits.
@@ -48,7 +48,7 @@ async function initMySQL(secretName: string) {
   return mysqlPool;
 }
 
-async function getSecret(secretName: string){
+async function getSecret(secretName){
   // Access the secret.
   const [accessResponse] = await secretManagerServiceClient.accessSecretVersion({name: secretName});
   return accessResponse.payload.data.toString('utf8');
