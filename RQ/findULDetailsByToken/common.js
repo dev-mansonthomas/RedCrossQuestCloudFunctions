@@ -35,24 +35,26 @@ if (process.env.NODE_ENV === 'production') {
 let mysqlPool;
 
 
-module.exports = {
-  initMySQL: async (secretName: string): Promise<T> => {
-
-
-    // Initialize the pool lazily, in case SQL access isn't needed for this
-    // GCF instance. Doing so minimizes the number of active SQL connections,
-    // which helps keep your GCF instances under SQL connection limits.
-    if (!mysqlPool)
-    {
-      // Access the secret.
-      mysqlConfig.password = await getSecret(secretName);
-      mysqlPool = mysql.createPool(mysqlConfig);
-    }
-    return mysqlPool;
-  },
-  getSecret: async (secretName: string): Promise<T> => {
+async function initMySQL(secretName: string): Promise<T> {
+// Initialize the pool lazily, in case SQL access isn't needed for this
+  // GCF instance. Doing so minimizes the number of active SQL connections,
+  // which helps keep your GCF instances under SQL connection limits.
+  if (!mysqlPool)
+  {
     // Access the secret.
-    const [accessResponse] = await secretManagerServiceClient.accessSecretVersion({name: secretName});
-    return accessResponse.payload.data.toString('utf8');
+    mysqlConfig.password = await getSecret(secretName);
+    mysqlPool = mysql.createPool(mysqlConfig);
   }
+  return mysqlPool;
+}
+
+async function getSecret(secretName: string): Promise<T> {
+  // Access the secret.
+  const [accessResponse] = await secretManagerServiceClient.accessSecretVersion({name: secretName});
+  return accessResponse.payload.data.toString('utf8');
+}
+
+module.exports = {
+  initMySQL: initMySQL,
+  getSecret: getSecret
 };
