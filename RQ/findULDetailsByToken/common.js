@@ -34,8 +34,8 @@ if (process.env.NODE_ENV === 'production') {
 // and handle dropped or expired connections automatically.
 let mysqlPool;
 
-
-async function initMySQL(secretName: string): Promise<T> {
+//: Promise<T>
+async function initMySQL(secretName: string) {
 // Initialize the pool lazily, in case SQL access isn't needed for this
   // GCF instance. Doing so minimizes the number of active SQL connections,
   // which helps keep your GCF instances under SQL connection limits.
@@ -48,7 +48,7 @@ async function initMySQL(secretName: string): Promise<T> {
   return mysqlPool;
 }
 
-async function getSecret(secretName: string): Promise<T> {
+async function getSecret(secretName: string){
   // Access the secret.
   const [accessResponse] = await secretManagerServiceClient.accessSecretVersion({name: secretName});
   return accessResponse.payload.data.toString('utf8');
