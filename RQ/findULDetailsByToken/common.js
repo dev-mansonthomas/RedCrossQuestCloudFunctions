@@ -43,7 +43,6 @@ async function initMySQL(secretName) {
   {
     // Access the secret.
     mysqlConfig.password = await getSecret(secretName);
-
     console.trace("creating MySQL Connection Pool ",[mysqlConfig]);
     mysqlPool = mysql.createPool(mysqlConfig);
   }
