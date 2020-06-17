@@ -43,6 +43,8 @@ async function initMySQL(secretName) {
   {
     // Access the secret.
     mysqlConfig.password = await getSecret(secretName);
+
+    console.trace("creating MySQL Connection Pool ",[mysqlConfig]);
     mysqlPool = mysql.createPool(mysqlConfig);
   }
   return mysqlPool;
@@ -50,6 +52,7 @@ async function initMySQL(secretName) {
 
 async function getSecret(secretName){
   // Access the secret.
+  console.trace("accessing secret with name "+secretName);
   const [accessResponse] = await secretManagerServiceClient.accessSecretVersion({name: secretName});
   return accessResponse.payload.data.toString('utf8');
 }
