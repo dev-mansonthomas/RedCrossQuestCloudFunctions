@@ -6,6 +6,8 @@ const secretManagerServiceClient   = new SecretManagerServiceClient();
 const connectionName = process.env.INSTANCE_CONNECTION_NAME || null;
 const dbUser         = process.env.SQL_USER                 || null;
 const dbName         = process.env.SQL_DB_NAME              || null;
+const env            = process.env.ENV                      || null;
+const country        = process.env.COUNTRY                  || null;
 
 
 if(connectionName === null)
@@ -17,6 +19,14 @@ if(dbUser         === null)
   throw new Error('env var not defined : SQL_USER'                );
 }
 if( dbName        === null)
+{
+  throw new Error('env var not defined : SQL_DB_NAME'             );
+}
+if( env           === null)
+{
+  throw new Error('env var not defined : SQL_DB_NAME'             );
+}
+if( country       === null)
 {
   throw new Error('env var not defined : SQL_DB_NAME'             );
 }
@@ -51,8 +61,9 @@ async function initMySQL(secretName) {
 
 async function getSecret(secretName){
   // Access the secret.
-  console.trace("accessing secret with name "+secretName);
-  const [accessResponse] = await secretManagerServiceClient.accessSecretVersion({name: secretName});
+  let secretPath = "projects/rq-"+country+"-"+env+"/secrets/"+secretName+"/versions/latest";
+  console.trace("accessing secret with path "+secretPath);
+  const [accessResponse] = await secretManagerServiceClient.accessSecretVersion({name: secretPath});
   return accessResponse.payload.data.toString('utf8');
 }
 
