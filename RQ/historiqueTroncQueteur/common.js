@@ -49,14 +49,14 @@ async function initMySQL(secretName) {
 // Initialize the pool lazily, in case SQL access isn't needed for this
   // GCF instance. Doing so minimizes the number of active SQL connections,
   // which helps keep your GCF instances under SQL connection limits.
-  if (!mysqlPool)
+  if (!module.exports.mysqlPool)
   {
     // Access the secret.
     mysqlConfig.password = await getSecret(secretName);
     console.trace("creating MySQL Connection Pool ",[mysqlConfig]);
-    mysqlPool = mysql.createPool(mysqlConfig);
+    module.exports.mysqlPool = mysql.createPool(mysqlConfig);
   }
-  return mysqlPool;
+  return module.exports.mysqlPool;
 }
 
 async function getSecret(secretName){
@@ -69,5 +69,6 @@ async function getSecret(secretName){
 
 module.exports = {
   initMySQL: initMySQL,
-  getSecret: getSecret
+  getSecret: getSecret,
+  mysqlPool: mysqlPool
 };

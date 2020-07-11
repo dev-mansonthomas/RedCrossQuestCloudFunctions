@@ -42,10 +42,17 @@ const queryStr = `
 exports.findULDetailsByToken = async (req, res) => {
   res.set('Access-Control-Allow-Origin', "*");
   res.set('Access-Control-Allow-Methods', 'GET, POST');
+
+  //respond to CORS preflight requests
+  if (req.method === 'OPTIONS')
+  {
+    res.status(204).send('');
+  }
+  
   let token  = req.query.token;
   let params = {};
 
-  mysqlPool = await common.initMySQL('MYSQL_USER_READ');
+  let mysqlPool = await common.initMySQL('MYSQL_USER_READ');
 
  if(
    !( token         !== undefined &&
