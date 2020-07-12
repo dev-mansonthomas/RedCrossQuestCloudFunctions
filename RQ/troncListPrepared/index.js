@@ -1,9 +1,5 @@
 'use strict';
-const mysql     = require('mysql');
-require('common');
-
-const Firestore = require('@google-cloud/firestore');
-const firestore = new Firestore();
+const common    = require('./common');
 
 const functions = require('firebase-functions');
 const admin     = require('firebase-admin');
@@ -46,7 +42,7 @@ const queryStr = `
 // [START findQueteurById]
 // Return a troncQueteur if exist that is in prepared state (depart_théorique not null and depart null)
 // it retrieves queteurId & UL_ID from firestore and then query RCQ MySQL
-exports.troncListPrepared = functions.https.onCall((data, context) => {
+exports.troncListPrepared = functions.https.onCall(async (data, context) => {
   // [START_EXCLUDE]
   // [START readMessageData]
       //use only the user Id to retrieve it's queteur_id
@@ -54,16 +50,12 @@ exports.troncListPrepared = functions.https.onCall((data, context) => {
   // [START messageHttpsErrors]
 
   // Checking that the user is authenticated.
-  if (!context.auth)
-  {
-    // Throwing an HttpsError so that the client gets the error details.
-    throw new functions.https.HttpsError('failed-precondition', 'The function must be called while authenticated.');
-  }
+  common.checkAuthentication(context);
 
   // Initialize the pool lazily, in case SQL access isn't needed for this
   // GCF instance. Doing so minimizes the number of active SQL connections,
   // which helps keep your GCF instances under SQL connection limits.
-  initMySQL('MYSQL_USER_READ');
+  let mysqlPool = await common.initMySQL('MYSQL_USER_READ');
 
   // [END messageHttpsErrors]
 
@@ -73,60 +65,40 @@ exports.troncListPrepared = functions.https.onCall((data, context) => {
   const name    = context.auth.token.name    || null;
   const email   = context.auth.token.email   || null;
 
-  console.log("uid='"+uid+"', name='"+name+"', email='"+email+"'");
+  console.log("troncListPrepared - uid='"+uid+"', name='"+name+"', email='"+email+"'");
   // [END authIntegration]
 
   // [START returnMessageAsync]
   // Saving the new message to the Realtime Database.
 
-  return firestore
-  .collection('queteurs')
-  .doc(uid)
-  .get()
-  .then(queteurPromise => {
-    if (queteurPromise.exists)
-    {
-      let queteurData = queteurPromise.data() ;
-      let queteurId   = queteurData.queteur_id;
-      let ulId        = queteurData.ul_id     ;
+  let queteurData = await common.getQueteurFromFirestore(uid);
 
-      return new Promise((resolve, reject) => {
-        mysqlPool.query(
-          queryStr,
-          [ulId, queteurId],
-          (err, results) => {
-            if (err)
-            {
-              console.error(err);
-              reject(err);
-            }
-            else
-            {
-              if(results !== undefined && Array.isArray(results) && results.length >= 1)
-              {
-                console.debug("found preparedTronc for queteurwith id '"+queteurId+"' and ul_id='"+ulId+"' for firestore queteurs(uid='"+uid+"') : " +JSON.stringify(results));
-                resolve(JSON.stringify(results));
-              }
-              else
-              {
-                console.error("no preparedTronc found for queteur with id '"+queteurId+"' and ul_id='"+ulId+"' for firestore queteurs(uid='"+uid+"') "+JSON.stringify(results));
-                resolve(JSON.stringify([]));
-              }
-            }
-          });
-      })
-
-    }
-    else
-    {
-      throw new functions.https.HttpsError('not-found', "queteur with uid='"+uid+" not found");
-    }
-  })
-  .catch(function(error) {
-    console.log("Error while getting current user document in queteur collection, with id='"+uid+"' "+JSON.stringify(error));
-    throw new functions.https.HttpsError('unknown', error.message, error);
+  return new Promise((resolve, reject) => {
+    mysqlPool.query(
+      queryStr,
+      [queteurData.ul_id, queteurData.queteur_id],
+      (err, results) => {
+        if (err)
+        {
+          console.error(err);
+          reject(err);
+        }
+        else
+        {
+          if(results !== undefined && Array.isArray(results) && results.length >= 1)
+          {
+            console.debug("found preparedTronc for queteurwith id '"+queteurId+"' and ul_id='"+ulId+"' for firestore queteurs(uid='"+uid+"') : " +JSON.stringify(results));
+            resolve(JSON.stringify(results));
+          }
+          else
+          {
+            console.error("no preparedTronc found for queteur with id '"+queteurId+"' and ul_id='"+ulId+"' for firestore queteurs(uid='"+uid+"') "+JSON.stringify(results));
+            resolve(JSON.stringify([]));
+          }
+        }
+      });
   });
-
+  
   // [END_EXCLUDE]
 });
 // [END messageFunctionTrigger]

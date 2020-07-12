@@ -1,7 +1,13 @@
 'use strict';
 const mysql                        = require('mysql');
+
 const {SecretManagerServiceClient} = require('@google-cloud/secret-manager');
 const secretManagerServiceClient   = new SecretManagerServiceClient();
+
+const Firestore = require('@google-cloud/firestore');
+const firestore = new Firestore();
+
+const functions                    = require('firebase-functions');
 
 const connectionName = process.env.INSTANCE_CONNECTION_NAME || null;
 const dbUser         = process.env.SQL_USER                 || null;
@@ -67,8 +73,61 @@ async function getSecret(secretName){
   return accessResponse.payload.data.toString('utf8');
 }
 
+function setCors(request, response)
+{
+  response.set('Access-Control-Allow-Origin', "*");
+  response.set('Access-Control-Allow-Methods', 'GET, POST');
+
+  //respond to CORS preflight requests
+  if (request.method === 'OPTIONS')
+  {
+    response.status(204).send('');
+    return true;
+  }
+
+  return false;
+}
+
+
+function checkAuthentication(context)
+{
+  if (!context.auth)
+  {
+    // Throwing an HttpsError so that the client gets the error details.
+    throw new functions.https.HttpsError('failed-precondition', 'The function must be called while authenticated.');
+  }
+}
+
+async function getQueteurFromFirestore(uid)
+{
+  firestore
+    .collection('queteurs')
+    .doc(uid)
+    .get()
+    .then(queteurPromise =>
+    {
+      if (queteurPromise.exists)
+      {
+        return queteurPromise.data();
+      }
+      else
+      {
+        throw new functions.https.HttpsError('not-found', "queteur with uid='"+uid+" not found");
+      }
+    }
+    )
+    .catch(function(error)
+    {
+      console.log("Error while getting current user document in queteur collection, with id='"+uid+"' "+error.message,error);
+      throw new functions.https.HttpsError('unknown', error.message, error);
+    });
+}
+
 module.exports = {
   initMySQL: initMySQL,
   getSecret: getSecret,
+  setCors  : setCors  ,
+  checkAuthentication : checkAuthentication,
+  getQueteurFromFirestore : getQueteurFromFirestore,
   mysqlPool: mysqlPool
 };
