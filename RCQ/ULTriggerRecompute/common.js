@@ -4,8 +4,6 @@ const mysql                        = require('mysql');
 const {SecretManagerServiceClient} = require('@google-cloud/secret-manager');
 const secretManagerServiceClient   = new SecretManagerServiceClient();
 
-const functions                    = require('firebase-functions');
-
 const connectionName = process.env.INSTANCE_CONNECTION_NAME || null;
 const dbUser         = process.env.SQL_USER                 || null;
 const dbName         = process.env.SQL_DB_NAME              || null;
@@ -84,22 +82,9 @@ function setCors(request, response)
   return false;
 }
 
-
-function checkAuthentication(context)
-{
-  if (!context.auth)
-  {
-    // Throwing an HttpsError so that the client gets the error details.
-    throw new functions.https.HttpsError('failed-precondition', 'The function must be called while authenticated.');
-  }
-}
-
-
-
 module.exports = {
   initMySQL: initMySQL,
   getSecret: getSecret,
   setCors  : setCors  ,
-  checkAuthentication : checkAuthentication,
   mysqlPool: mysqlPool
 };
