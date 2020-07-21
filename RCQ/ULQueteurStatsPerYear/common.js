@@ -5,7 +5,10 @@ const {SecretManagerServiceClient} = require('@google-cloud/secret-manager');
 const secretManagerServiceClient   = new SecretManagerServiceClient();
 
 const Firestore = require('@google-cloud/firestore');
-const firestore = new Firestore();
+// if  process.env.TARGET_PROJECT_ID is defined, it's RCQ CF that tries to reach RQ Firestore
+// otherwise, it's RQ reaching its own firestore
+const firestore = process.env.TARGET_PROJECT_ID ? new Firestore ({projectId:process.env.TARGET_PROJECT_ID}) : new Firestore ();
+firestore.settings({timestampsInSnapshots: true});
 
 const functions                    = require('firebase-functions');
 
@@ -99,27 +102,21 @@ function checkAuthentication(context)
 
 async function getQueteurFromFirestore(uid)
 {
-  firestore
+  let queteurPromise = await firestore
     .collection('queteurs')
     .doc(uid)
-    .get()
-    .then(queteurPromise =>
-    {
-      if (queteurPromise.exists)
-      {
-        return queteurPromise.data();
-      }
-      else
-      {
-        throw new functions.https.HttpsError('not-found', "queteur with uid='"+uid+" not found");
-      }
-    }
-    )
-    .catch(function(error)
-    {
-      console.log("Error while getting current user document in queteur collection, with id='"+uid+"' "+error.message,error);
-      throw new functions.https.HttpsError('unknown', error.message, error);
-    });
+    .get();
+
+  console.log("getQueteurFromFirestore - "+JSON.stringify(queteurPromise));
+  
+  if (queteurPromise.exists)
+  {
+    return queteurPromise.data();
+  }
+  else
+  {
+    throw new functions.https.HttpsError('not-found', "queteur with uid='"+uid+" not found");
+  }
 }
 
 
@@ -138,5 +135,6 @@ module.exports = {
   checkAuthentication : checkAuthentication,
   getQueteurFromFirestore : getQueteurFromFirestore,
   updateQueteurFromFirestore:updateQueteurFromFirestore,
-  mysqlPool: mysqlPool
+  mysqlPool: mysqlPool,
+  firestore:firestore
 };

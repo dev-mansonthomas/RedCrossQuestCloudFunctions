@@ -43,25 +43,13 @@ const queryStr = `
 exports.troncListPrepared = functions.https.onCall(async (data, context) => {
 
   common.checkAuthentication(context);
-
-  // Initialize the pool lazily, in case SQL access isn't needed for this
-  // GCF instance. Doing so minimizes the number of active SQL connections,
-  // which helps keep your GCF instances under SQL connection limits.
   let mysqlPool = await common.initMySQL('MYSQL_USER_READ');
 
-  // [END messageHttpsErrors]
-
-  // [START authIntegration]
-  // Authentication / user information is automatically added to the request.
   const uid     = context.auth.uid;
   const name    = context.auth.token.name    || null;
   const email   = context.auth.token.email   || null;
 
   console.log("troncListPrepared - uid='"+uid+"', name='"+name+"', email='"+email+"'");
-  // [END authIntegration]
-
-  // [START returnMessageAsync]
-  // Saving the new message to the Realtime Database.
 
   let queteurData = await common.getQueteurFromFirestore(uid);
 
@@ -90,7 +78,4 @@ exports.troncListPrepared = functions.https.onCall(async (data, context) => {
         }
       });
   });
-  
-  // [END_EXCLUDE]
 });
-// [END messageFunctionTrigger]

@@ -1,5 +1,6 @@
 'use strict';
-const mysql     = require('mysql');
+const common    = require('./common');
+
 const {PubSub}  = require('@google-cloud/pubsub');
 
 const topicName       = 'ul_update';
@@ -18,25 +19,6 @@ function handleError(err){
     console.error('ERROR:', err);
   }
 }
-
-const connectionName = process.env.INSTANCE_CONNECTION_NAME || null;
-const dbUser         = process.env.SQL_USER                 || null;
-const dbPassword     = process.env.SQL_PASSWORD             || null;
-const dbName         = process.env.SQL_DB_NAME              || null;
-
-const mysqlConfig = {
-  connectionLimit : 1,
-  user            : dbUser,
-  password        : dbPassword,
-  database        : dbName,
-};
-if (process.env.NODE_ENV === 'production') {
-  mysqlConfig.socketPath = `/cloudsql/${connectionName}`;
-}
-
-// Connection pools reuse connections between invocations,
-// and handle dropped or expired connections automatically.
-let mysqlPool;
 
 const queryStr = `
 SELECT u.id, u.name, u.phone, u.latitude, u.longitude, u.address, u.postal_code, u.city, u.external_id, u.email, 
@@ -62,10 +44,7 @@ exports.ULTriggerRecompute = async (event, context) => {
   // Initialize the pool lazily, in case SQL access isn't needed for this
   // GCF instance. Doing so minimizes the number of active SQL connections,
   // which helps keep your GCF instances under SQL connection limits.
-  if (!mysqlPool)
-  {
-    mysqlPool = mysql.createPool(mysqlConfig);
-  }
+  let mysqlPool = await common.initMySQL('MYSQL_USER_READ');
 
   return new Promise((resolve, reject) => {
     mysqlPool.query(queryStr, [],

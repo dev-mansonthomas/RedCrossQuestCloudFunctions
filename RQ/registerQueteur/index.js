@@ -5,8 +5,6 @@ const admin          = require('firebase-admin');
 const { v4: uuidv4 } = require('uuid');
 admin.initializeApp();
 
-const cors = require('cors')({origin: true});
-
 const queryStr = `
 INSERT INTO \`queteur_registration\`
 (\`first_name\`,\`last_name\`,\`man\`,\`birthdate\`,\`email\`,\`secteur\`,\`nivol\`,\`mobile\`,\`created\`,\`ul_registration_token\`, \`queteur_registration_token\`)
@@ -26,7 +24,7 @@ exports.registerQueteur = functions.https.onCall(async (data, context) => {
   // Initialize the pool lazily, in case SQL access isn't needed for this
   // GCF instance. Doing so minimizes the number of active SQL connections,
   // which helps keep your GCF instances under SQL connection limits.
-  let mysqlPool = await common.initMySQL('MYSQL_USER_READ');
+  let mysqlPool = await common.initMySQL('MYSQL_USER_WRITE');
 
 
   let first_name           = data.first_name           ;

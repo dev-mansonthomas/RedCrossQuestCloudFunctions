@@ -15,7 +15,7 @@
     "logs": "firebase functions:log"
   },
   "dependencies": {
-    "firebase-admin": "^9.0.0",
+    "firebase-admin": "^8.13.0",
     "firebase-functions": "^3.8.0",
     "@google-cloud/firestore": "^4.1.1",
     "mysql": "^2.18.1",
@@ -23,8 +23,7 @@
     "google-auth-library": "^6.0.5"
   },
   "devDependencies": {
-    "cors": "^2.8.5",
-    "eslint": "^7.4.0",
+    "eslint": "^7.5.0",
     "eslint-plugin-promise": "^4.2.1"
   },
   "private": true

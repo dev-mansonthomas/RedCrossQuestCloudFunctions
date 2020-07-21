@@ -5,7 +5,10 @@ const {SecretManagerServiceClient} = require('@google-cloud/secret-manager');
 const secretManagerServiceClient   = new SecretManagerServiceClient();
 
 const Firestore = require('@google-cloud/firestore');
-const firestore = new Firestore();
+// if  process.env.TARGET_PROJECT_ID is defined, it's RCQ CF that tries to reach RQ Firestore
+// otherwise, it's RQ reaching its own firestore
+const firestore = process.env.TARGET_PROJECT_ID ? new Firestore ({projectId:process.env.TARGET_PROJECT_ID}) : new Firestore ();
+firestore.settings({timestampsInSnapshots: true});
 
 const functions                    = require('firebase-functions');
 
@@ -132,5 +135,6 @@ module.exports = {
   checkAuthentication : checkAuthentication,
   getQueteurFromFirestore : getQueteurFromFirestore,
   updateQueteurFromFirestore:updateQueteurFromFirestore,
-  mysqlPool: mysqlPool
+  mysqlPool: mysqlPool,
+  firestore:firestore
 };

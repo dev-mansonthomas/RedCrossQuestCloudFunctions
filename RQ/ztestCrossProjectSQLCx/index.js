@@ -1,26 +1,9 @@
 'use strict';
-const mysql     = require('mysql');
+const common    = require('./common');
 
-const connectionName = process.env.INSTANCE_CONNECTION_NAME || null;
-const dbUser         = process.env.SQL_USER                 || null;
-const dbPassword     = process.env.SQL_PASSWORD             || null;
-const dbName         = process.env.SQL_DB_NAME              || null;
+exports.ztestCrossProjectSQLCx = async (req, res) => {
 
-const mysqlConfig = {
-  connectionLimit : 1,
-  user            : dbUser,
-  password        : dbPassword,
-  database        : dbName,
-};
-if (process.env.NODE_ENV === 'production') {
-  mysqlConfig.socketPath = `/cloudsql/${connectionName}`;
-}
-
-// Connection pools reuse connections between invocations,
-// and handle dropped or expired connections automatically.
-let mysqlPool;
-
-exports.ztestCrossProjectSQLCx = (req, res) => {
+  let mysqlPool = await common.initMySQL('MYSQL_USER_READ');
 
   const queryStr = `
 select count(1) as nb_tq
