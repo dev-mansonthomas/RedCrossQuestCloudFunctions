@@ -1,32 +1,11 @@
 'use strict';
-const mysql          = require('mysql');
+const common         = require('./common');
 const functions      = require('firebase-functions');
 const admin          = require('firebase-admin');
 const { v4: uuidv4 } = require('uuid');
 admin.initializeApp();
 
-
-
-const connectionName = process.env.INSTANCE_CONNECTION_NAME || null;
-const dbUser         = process.env.SQL_USER                 || null;
-const dbPassword     = process.env.SQL_PASSWORD             || null;
-const dbName         = process.env.SQL_DB_NAME              || null;
-
-
-const mysqlConfig = {
-  connectionLimit : 1,
-  user            : dbUser,
-  password        : dbPassword,
-  database        : dbName,
-};
-if (process.env.NODE_ENV === 'production') {
-  mysqlConfig.socketPath = `/cloudsql/${connectionName}`;
-}
-
-// Connection pools reuse connections between invocations,
-// and handle dropped or expired connections automatically.
-let mysqlPool;
-
+const cors = require('cors')({origin: true});
 
 const queryStr = `
 INSERT INTO \`queteur_registration\`
@@ -40,39 +19,14 @@ VALUES
  *
  * Permissions : MySQL Write
  * */
-exports.registerQueteur = functions.https.onCall((data, context) => {
+exports.registerQueteur = functions.https.onCall(async (data, context) => {
 
-  if (!context.auth)
-  {
-    // Throwing an HttpsError so that the client gets the error details.
-    throw new functions.https.HttpsError('failed-precondition', 'The function must be called while authenticated.');
-  }
+  common.checkAuthentication(context);
 
   // Initialize the pool lazily, in case SQL access isn't needed for this
   // GCF instance. Doing so minimizes the number of active SQL connections,
   // which helps keep your GCF instances under SQL connection limits.
-  if (!mysqlPool)
-  {
-
-    if(connectionName === null)
-    {
-      throw new functions.https.HttpsError('internal', 'env var not defined : INSTANCE_CONNECTION_NAME');
-    }
-    if(dbUser         === null)
-    {
-      throw new functions.https.HttpsError('internal', 'env var not defined : SQL_USER'                );
-    }
-    if(dbPassword     === null)
-    {
-      throw new functions.https.HttpsError('internal', 'env var not defined : SQL_PASSWORD'            );
-    }
-    if( dbName        === null)
-    {
-      throw new functions.https.HttpsError('internal', 'env var not defined : SQL_DB_NAME'             );
-    }
-
-    mysqlPool = mysql.createPool(mysqlConfig);
-  }
+  let mysqlPool = await common.initMySQL('MYSQL_USER_READ');
 
 
   let first_name           = data.first_name           ;

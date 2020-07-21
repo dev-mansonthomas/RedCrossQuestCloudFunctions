@@ -1,5 +1,5 @@
 'use strict';
-const mysql     = require('mysql');
+const common    = require('./common');
 
 const Firestore = require('@google-cloud/firestore');
 const firestore = new Firestore();
@@ -8,28 +8,7 @@ const functions = require('firebase-functions');
 const admin     = require('firebase-admin');
 admin.initializeApp();
 
-
-const connectionName = process.env.INSTANCE_CONNECTION_NAME || null;
-const dbUser         = process.env.SQL_USER                 || null;
-const dbPassword     = process.env.SQL_PASSWORD             || null;
-const dbName         = process.env.SQL_DB_NAME              || null;
-
-
-const mysqlConfig = {
-  connectionLimit : 1,
-  user            : dbUser,
-  password        : dbPassword,
-  database        : dbName,
-};
-if (process.env.NODE_ENV === 'production') {
-  mysqlConfig.socketPath = `/cloudsql/${connectionName}`;
-}
-
-// Connection pools reuse connections between invocations,
-// and handle dropped or expired connections automatically.
-let mysqlPool;
-
-
+const cors = require('cors')({origin: true});
 
 const queryStr = `
   SELECT  q.id,                                          
@@ -74,7 +53,7 @@ const queryStr = `
 
 // [START findQueteurById]
 // retrieve Queteur Info from it's ID in RCQ DB
-exports.findQueteurById = functions.https.onCall( (data, context) => {
+exports.findQueteurById = functions.https.onCall( async (data, context) => {
   // [START_EXCLUDE]
   // [START readMessageData]
       //use only the user Id to retrieve it's queteur_id
@@ -82,37 +61,12 @@ exports.findQueteurById = functions.https.onCall( (data, context) => {
   // [START messageHttpsErrors]
 
   // Checking that the user is authenticated.
-  if (!context.auth)
-  {
-    // Throwing an HttpsError so that the client gets the error details.
-    throw new functions.https.HttpsError('failed-precondition', 'The function must be called while authenticated.');
-  }
+  common.checkAuthentication(context);
 
   // Initialize the pool lazily, in case SQL access isn't needed for this
   // GCF instance. Doing so minimizes the number of active SQL connections,
   // which helps keep your GCF instances under SQL connection limits.
-  if (!mysqlPool)
-  {
-
-    if(connectionName === null)
-    {
-      throw new functions.https.HttpsError('internal', 'env var not defined : INSTANCE_CONNECTION_NAME');
-    }
-    if(dbUser         === null)
-    {
-      throw new functions.https.HttpsError('internal', 'env var not defined : SQL_USER'                );
-    }
-    if(dbPassword     === null)
-    {
-      throw new functions.https.HttpsError('internal', 'env var not defined : SQL_PASSWORD'            );
-    }
-    if( dbName        === null)
-    {
-      throw new functions.https.HttpsError('internal', 'env var not defined : SQL_DB_NAME'             );
-    }
-
-    mysqlPool = mysql.createPool(mysqlConfig);
-  }
+  let mysqlPool = await common.initMySQL('MYSQL_USER_READ');
 
   // [END messageHttpsErrors]
 
@@ -122,7 +76,7 @@ exports.findQueteurById = functions.https.onCall( (data, context) => {
   const name    = context.auth.token.name    || null;
   const email   = context.auth.token.email   || null;
 
-  console.log("uid='"+uid+"', name='"+name+"', email='"+email+"'");
+  console.log("findQueteurById - uid='"+uid+"', name='"+name+"', email='"+email+"'");
   // [END authIntegration]
 
   // [START returnMessageAsync]

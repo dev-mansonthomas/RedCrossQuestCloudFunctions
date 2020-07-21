@@ -1,5 +1,4 @@
 'use strict';
-const mysql     = require('mysql');
 const common    = require('./common');
 
 const queryStr = `
@@ -40,13 +39,10 @@ const queryStr = `
  * @param {!express:Response} res HTTP response context.
  */
 exports.findULDetailsByToken = async (req, res) => {
-  res.set('Access-Control-Allow-Origin', "*");
-  res.set('Access-Control-Allow-Methods', 'GET, POST');
 
-  //respond to CORS preflight requests
-  if (req.method === 'OPTIONS')
+  if(common.setCors(req, res))
   {
-    res.status(204).send('');
+    return;
   }
   
   let token  = req.query.token;
@@ -54,7 +50,7 @@ exports.findULDetailsByToken = async (req, res) => {
 
   let mysqlPool = await common.initMySQL('MYSQL_USER_READ');
 
- if(
+  if(
    !( token         !== undefined &&
       typeof token  === 'string'  &&
       token.length  === 36        &&
