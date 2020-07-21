@@ -104,16 +104,17 @@ async function getQueteurFromFirestore(uid)
     .doc(uid)
     .get()
     .then(queteurPromise =>
-    {
-      if (queteurPromise.exists)
       {
-        return queteurPromise.data();
+        console.log("getQueteurFromFirestore - "+JSON.stringify(queteurPromise));
+        if (queteurPromise.exists)
+        {
+          return queteurPromise.data();
+        }
+        else
+        {
+          throw new functions.https.HttpsError('not-found', "queteur with uid='"+uid+" not found");
+        }
       }
-      else
-      {
-        throw new functions.https.HttpsError('not-found', "queteur with uid='"+uid+" not found");
-      }
-    }
     )
     .catch(function(error)
     {
