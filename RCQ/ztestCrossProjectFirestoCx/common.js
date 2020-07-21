@@ -59,7 +59,6 @@ async function initMySQL(secretName) {
   {
     // Access the secret.
     mysqlConfig.password = await getSecret(secretName);
-    console.trace("creating MySQL Connection Pool ",[mysqlConfig]);
     module.exports.mysqlPool = mysql.createPool(mysqlConfig);
   }
   return module.exports.mysqlPool;
@@ -123,11 +122,21 @@ async function getQueteurFromFirestore(uid)
     });
 }
 
+
+async function updateQueteurFromFirestore(uid, data)
+{
+  return firestore
+    .collection('queteurs')
+    .doc(uid)
+    .update(data);
+}
+
 module.exports = {
   initMySQL: initMySQL,
   getSecret: getSecret,
   setCors  : setCors  ,
   checkAuthentication : checkAuthentication,
   getQueteurFromFirestore : getQueteurFromFirestore,
+  updateQueteurFromFirestore:updateQueteurFromFirestore,
   mysqlPool: mysqlPool
 };

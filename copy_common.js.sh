@@ -9,6 +9,7 @@ function copyCommon
   for dir in "${TARGET_FOLDER}"/*
   do
     cd "${dir}" || exit 1
+    rm common.js
     cp ../../common.js .
     cd -  || exit 1
 
