@@ -92,7 +92,8 @@ exports.historiqueTroncQueteur = functions.https.onCall(async (data, context) =>
   console.log("historiqueTroncQueteur - uid='"+uid+"', name='"+name+"', email='"+email+"'");
 
   let queteurData = await common.getQueteurFromFirestore(uid);
-
+  console.log(queteurData);
+  
   return new Promise((resolve, reject) => {
 
     if(
