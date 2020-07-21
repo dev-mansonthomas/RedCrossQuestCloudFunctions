@@ -39,17 +39,9 @@ const queryStr = `
 `;
 
 
-// [START findQueteurById]
-// Return a troncQueteur if exist that is in prepared state (depart_théorique not null and depart null)
-// it retrieves queteurId & UL_ID from firestore and then query RCQ MySQL
-exports.troncListPrepared = functions.https.onCall(async (data, context) => {
-  // [START_EXCLUDE]
-  // [START readMessageData]
-      //use only the user Id to retrieve it's queteur_id
-  // [END readMessageData]
-  // [START messageHttpsErrors]
 
-  // Checking that the user is authenticated.
+exports.troncListPrepared = functions.https.onCall(async (data, context) => {
+
   common.checkAuthentication(context);
 
   // Initialize the pool lazily, in case SQL access isn't needed for this

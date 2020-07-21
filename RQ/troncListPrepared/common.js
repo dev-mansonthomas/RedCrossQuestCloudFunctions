@@ -30,11 +30,11 @@ if( dbName        === null)
 }
 if( env           === null)
 {
-  throw new Error('env var not defined : SQL_DB_NAME'             );
+  throw new Error('env var not defined : ENV'                     );
 }
 if( country       === null)
 {
-  throw new Error('env var not defined : SQL_DB_NAME'             );
+  throw new Error('env var not defined : COUNTRY'                 );
 }
 
 const mysqlConfig = {
