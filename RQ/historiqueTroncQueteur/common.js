@@ -99,28 +99,21 @@ function checkAuthentication(context)
 
 async function getQueteurFromFirestore(uid)
 {
-  firestore
+  let queteurPromise = await firestore
     .collection('queteurs')
     .doc(uid)
-    .get()
-    .then(queteurPromise =>
-      {
-        console.log("getQueteurFromFirestore - "+JSON.stringify(queteurPromise));
-        if (queteurPromise.exists)
-        {
-          return queteurPromise.data();
-        }
-        else
-        {
-          throw new functions.https.HttpsError('not-found', "queteur with uid='"+uid+" not found");
-        }
-      }
-    )
-    .catch(function(error)
-    {
-      console.log("Error while getting current user document in queteur collection, with id='"+uid+"' "+error.message,error);
-      throw new functions.https.HttpsError('unknown', error.message, error);
-    });
+    .get();
+
+  console.log("getQueteurFromFirestore - "+JSON.stringify(queteurPromise));
+  
+  if (queteurPromise.exists)
+  {
+    return queteurPromise.data();
+  }
+  else
+  {
+    throw new functions.https.HttpsError('not-found', "queteur with uid='"+uid+" not found");
+  }
 }
 
 
