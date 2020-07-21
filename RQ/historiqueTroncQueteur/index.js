@@ -1,6 +1,7 @@
 'use strict';
 const common              = require('./common');
 const common_firestore    = require('./common_firestore');
+const common_firebase     = require('./common_firebase' );
 
 const moment    = require('moment');
 
@@ -84,7 +85,7 @@ const queryStr = `
  * */
 exports.historiqueTroncQueteur = functions.https.onCall(async (data, context) => {
 
-  common.checkAuthentication(context);
+  common_firebase.checkAuthentication(context);
   let mysqlPool = await common.initMySQL('MYSQL_USER_READ');
 
   const uid     = context.auth.uid;

@@ -1,5 +1,7 @@
 'use strict';
 const common         = require('./common');
+const common_firebase= require('./common_firebase' );
+
 const functions      = require('firebase-functions');
 const admin          = require('firebase-admin');
 const { v4: uuidv4 } = require('uuid');
@@ -19,7 +21,7 @@ VALUES
  * */
 exports.registerQueteur = functions.https.onCall(async (data, context) => {
 
-  common.checkAuthentication(context);
+  common_firebase.checkAuthentication(context);
 
   // Initialize the pool lazily, in case SQL access isn't needed for this
   // GCF instance. Doing so minimizes the number of active SQL connections,

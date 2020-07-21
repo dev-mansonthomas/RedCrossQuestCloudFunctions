@@ -1,6 +1,7 @@
 'use strict';
 const common              = require('./common');
 const common_firestore    = require('./common_firestore');
+const common_firebase     = require('./common_firebase' );
 
 const functions = require('firebase-functions');
 const admin     = require('firebase-admin');
@@ -22,7 +23,7 @@ const queryTmpl = `
  * */
 exports.troncSetDepartOrRetour = functions.https.onCall(async (data, context) => {
 
-  common.checkAuthentication(context);
+  common_firebase.checkAuthentication(context);
   let mysqlPool = await common.initMySQL('MYSQL_USER_WRITE');
 
   const uid     = context.auth.uid;
