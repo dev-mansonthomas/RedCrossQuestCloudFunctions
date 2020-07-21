@@ -1,5 +1,6 @@
 'use strict';
-const common    = require('./common');
+const common              = require('./common');
+const common_firestore    = require('./common_firestore');
 
 const fsCollectionName = 'ul_queteur_stats_per_year';
 
@@ -94,9 +95,9 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
   {
     console.log("removing documents on collection '"+path+"' for ul_id="+ul_id);
     // Get a new write batch
-    let batch = common.firestore.batch();
+    let batch = common_firestore.firestore.batch();
 
-    return common.firestore
+    return common_firestore.firestore
       .collection(path)
       .where("ul_id", "==", ul_id)
       .get()
@@ -131,8 +132,8 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
             {
               if(Array.isArray(results) && results.length >= 1)
               {
-                const batch       = common.firestore.batch();
-                const collection  = common.firestore.collection(fsCollectionName);
+                const batch       = common_firestore.firestore.batch();
+                const collection  = common_firestore.firestore.collection(fsCollectionName);
                 let i = 0;
                 results.forEach(
                   (row) =>

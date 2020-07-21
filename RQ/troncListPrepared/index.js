@@ -1,5 +1,6 @@
 'use strict';
-const common    = require('./common');
+const common              = require('./common');
+const common_firestore    = require('./common_firestore');
 
 const functions = require('firebase-functions');
 const admin     = require('firebase-admin');
@@ -51,7 +52,7 @@ exports.troncListPrepared = functions.https.onCall(async (data, context) => {
 
   console.log("troncListPrepared - uid='"+uid+"', name='"+name+"', email='"+email+"'");
 
-  let queteurData = await common.getQueteurFromFirestore(uid);
+  let queteurData = await common_firestore.getQueteurFromFirestore(uid);
 
   return new Promise((resolve, reject) => {
     mysqlPool.query(

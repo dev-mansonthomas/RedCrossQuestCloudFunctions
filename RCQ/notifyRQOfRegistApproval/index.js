@@ -1,6 +1,5 @@
 'use strict';
-const Firestore = require('@google-cloud/firestore');
-const firestore = new Firestore({projectId:process.env.TARGET_PROJECT_ID});
+const common_firestore    = require('./common_firestore');
 
 /**
  * Search in RedQuest Firestore for the queteur with it registration UUID
@@ -32,7 +31,7 @@ exports.notifyRQOfRegistApproval = (event, context) => {
 
   let updateQueteur = function(documentId, parsedObject)
   {
-    firestore.collection('queteurs')
+    common_firestore.firestore.collection('queteurs')
       .doc(documentId)
       .update(
         {
@@ -44,7 +43,7 @@ exports.notifyRQOfRegistApproval = (event, context) => {
       })
   };
 
-  return firestore.collection('queteurs').where('queteur_registration_token', '==', parsedObject.queteur_registration_token)
+  return common_firestore.firestore.collection('queteurs').where('queteur_registration_token', '==', parsedObject.queteur_registration_token)
   .get()
   .then(doc =>
       {

@@ -1,5 +1,7 @@
 'use strict';
-const common    = require('./common');
+const common              = require('./common');
+const common_firestore    = require('./common_firestore');
+
 const moment    = require('moment');
 
 const functions = require('firebase-functions');
@@ -91,7 +93,7 @@ exports.historiqueTroncQueteur = functions.https.onCall(async (data, context) =>
 
   console.log("historiqueTroncQueteur - uid='"+uid+"', name='"+name+"', email='"+email+"'");
 
-  let queteurData = await common.getQueteurFromFirestore(uid);
+  let queteurData = await common_firestore.getQueteurFromFirestore(uid);
 
   console.log("queteurData:"+JSON.stringify(queteurData));
   
@@ -126,7 +128,7 @@ exports.historiqueTroncQueteur = functions.https.onCall(async (data, context) =>
           else
           {
             let myResults = JSON.parse(JSON.stringify(results));
-            common.updateQueteurFromFirestore
+            common_firestore.updateQueteurFromFirestore
               (
                 uid,
                 {
