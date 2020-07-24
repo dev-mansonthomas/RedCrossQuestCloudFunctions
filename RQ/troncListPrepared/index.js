@@ -69,19 +69,15 @@ exports.troncListPrepared = functions.https.onCall(async (data, context) => {
         {
           if(results !== undefined && Array.isArray(results) && results.length >= 1)
           {
-            console.debug("found preparedTronc for queteurwith id '"+queteurId+"' and ul_id='"+ulId+"' for firestore queteurs(uid='"+uid+"') : " +JSON.stringify(results));
+            console.debug("found preparedTronc for queteurwith id '"+queteurData.queteur_id+"' and ul_id='"+queteurData.ul_id+"' for firestore queteurs(uid='"+uid+"') : " +JSON.stringify(results));
             resolve(JSON.stringify(results));
           }
           else
           {
-            console.error("no preparedTronc found for queteur with id '"+queteurId+"' and ul_id='"+ulId+"' for firestore queteurs(uid='"+uid+"') "+JSON.stringify(results));
+            console.error("no preparedTronc found for queteur with id '"+queteurData.queteur_id+"' and ul_id='"+queteurData.ul_id+"' for firestore queteurs(uid='"+uid+"') "+JSON.stringify(results));
             resolve(JSON.stringify([]));
           }
         }
-      }).then(()=>{
-      console.trace("Query executed", queryStr);
-    }).catch((error)=>{
-      console.error("Error while executing query", error);
-    });
+      });
   });
 });
