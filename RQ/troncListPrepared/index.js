@@ -78,6 +78,10 @@ exports.troncListPrepared = functions.https.onCall(async (data, context) => {
             resolve(JSON.stringify([]));
           }
         }
-      });
+      }).then(()=>{
+      console.trace("Query executed", queryStr);
+    }).catch((error)=>{
+      console.error("Error while executing query", error);
+    });
   });
 });
