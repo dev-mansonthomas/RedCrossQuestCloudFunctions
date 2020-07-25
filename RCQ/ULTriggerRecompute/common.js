@@ -66,7 +66,7 @@ async function initMySQL(secretName) {
 
 async function getSecret(secretName){
   // Access the secret.
-  let secretPath = "projects/"+project+"-"+country+"-"+env+"/secrets/"+secretName+"/versions/latest";
+  let secretPath = "projects/"+project.toLowerCase()+"-"+country+"-"+env+"/secrets/"+secretName+"/versions/latest";
   console.trace("accessing secret with path "+secretPath);
   const [accessResponse] = await secretManagerServiceClient.accessSecretVersion({name: secretPath});
   return accessResponse.payload.data.toString('utf8');
