@@ -4,13 +4,12 @@ const mysql                        = require('mysql');
 const {SecretManagerServiceClient} = require('@google-cloud/secret-manager');
 const secretManagerServiceClient   = new SecretManagerServiceClient();
 
-const functions                    = require('firebase-functions');
-
 const connectionName = process.env.INSTANCE_CONNECTION_NAME || null;
 const dbUser         = process.env.SQL_USER                 || null;
 const dbName         = process.env.SQL_DB_NAME              || null;
 const env            = process.env.ENV                      || null;
 const country        = process.env.COUNTRY                  || null;
+const project        = process.env.PROJECT                  || null;
 
 
 if(connectionName === null)
@@ -32,6 +31,10 @@ if( env           === null)
 if( country       === null)
 {
   throw new Error('env var not defined : COUNTRY'                 );
+}
+if( project       === null)
+{
+  throw new Error('env var not defined : PROJECT'                 );
 }
 
 const mysqlConfig = {
@@ -63,7 +66,7 @@ async function initMySQL(secretName) {
 
 async function getSecret(secretName){
   // Access the secret.
-  let secretPath = "projects/rq-"+country+"-"+env+"/secrets/"+secretName+"/versions/latest";
+  let secretPath = "projects/"+project+"-"+country+"-"+env+"/secrets/"+secretName+"/versions/latest";
   console.trace("accessing secret with path "+secretPath);
   const [accessResponse] = await secretManagerServiceClient.accessSecretVersion({name: secretPath});
   return accessResponse.payload.data.toString('utf8');
@@ -84,22 +87,9 @@ function setCors(request, response)
   return false;
 }
 
-
-function checkAuthentication(context)
-{
-  if (!context.auth)
-  {
-    // Throwing an HttpsError so that the client gets the error details.
-    throw new functions.https.HttpsError('failed-precondition', 'The function must be called while authenticated.');
-  }
-}
-
-
-
 module.exports = {
   initMySQL: initMySQL,
   getSecret: getSecret,
   setCors  : setCors  ,
-  checkAuthentication : checkAuthentication,
   mysqlPool: mysqlPool
 };
