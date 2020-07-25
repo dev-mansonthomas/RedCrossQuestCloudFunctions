@@ -181,7 +181,7 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
                   console.log(logMessage);
 
                   parsedObject.currentIndex = currentIndex++;
-                  const newDataBuffer  = Buffer.from(JSON.stringify(parsedObject));
+                  const newDataBuffer  = Buffer.from(JSON.stringify(parsedObject));  
 
                   pubsubClient
                     .topic     (topicName)
