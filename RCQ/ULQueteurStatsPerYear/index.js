@@ -2,6 +2,10 @@
 const common              = require('./common');
 const common_firestore    = require('./common_firestore');
 
+const {PubSub}        = require('@google-cloud/pubsub');
+const topicName       = 'ul_update';
+const pubsubClient    = new PubSub();
+
 const fsCollectionName = 'ul_queteur_stats_per_year';
 
 const queryStr = `
@@ -70,6 +74,16 @@ const queryStr = `
   group by tq.ul_id, tq.queteur_id, q.first_name, q.last_name,  year                                
 `;
 
+function handleError(err){
+  if (err && err.name === 'PartialFailureError') {
+    if (err.errors && err.errors.length > 0) {
+      console.log('Insert errors:');
+      err.errors.forEach(err => console.error(err));
+    }
+  } else {
+    console.error('ERROR:', err);
+  }
+}
 
 /***
  * Cloud Scheduler "trigger_ul_update" publish an empty message on "trigger_ul_update"
@@ -80,13 +94,30 @@ const queryStr = `
  * roles/cloudsql.client (ou roles/cloudsql.viewer)
  * roles/datastore.user on RQ Firestore
  *
+ * data Recieved :
+ * const data = {currentIndex:0, uls:results};
  *
  * */
 exports.ULQueteurStatsPerYear = async (event, context) => {
 
   const pubsubMessage = event.data;
   const parsedObject  = JSON.parse(Buffer.from(pubsubMessage, 'base64').toString());
-  const ul_id         = parsedObject.id;
+  const uls           = parsedObject.uls;
+  let   currentIndex  = parsedObject.currentIndex;
+
+  if(!Array.isArray(uls))
+  {
+    console.error("uls is not an array", uls);
+    return;
+  }
+  if(currentIndex >= uls.length )
+  {
+    console.error("currentIndex is greater than array size", uls);
+    return;
+  }
+
+  const ul_id         = uls[currentIndex].id;
+  const ul_name       = uls[currentIndex].name;
 
   let mysqlPool = await common.initMySQL('MYSQL_USER_READ');
 
@@ -125,7 +156,7 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
 
             if (err)
             {
-              console.error(err);
+              console.error("Error while querying MySQL with query "+queryStr, err);
               reject(err);
             }
             else
@@ -146,10 +177,22 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
 
                 return batch.commit().then(() => {
 
-                  let logMessage = "ULQueteurStatsPerYear for UL='"+parsedObject.name+"'("+ul_id+") : "+i+" rows inserted";
-
+                  let logMessage = "ULQueteurStatsPerYear for UL='"+ul_name+"'("+ul_id+") : "+i+" rows inserted";
                   console.log(logMessage);
-                  resolve(logMessage);
+
+                  parsedObject.currentIndex = currentIndex++;
+                  const newDataBuffer  = Buffer.from(JSON.stringify(data));
+
+                  pubsubClient
+                    .topic     (topicName)
+                    .publish   (newDataBuffer)
+                    .then      ((dataResult)=>{
+                      console.trace("Published 1 message to process next UL on topic '"+topicName+"' "+JSON.stringify(dataResult), parsedObject);
+                      resolve(logMessage);
+                    })
+                    .catch(err=>{
+                      handleError(err);
+                    });
                 });
               }
               else
