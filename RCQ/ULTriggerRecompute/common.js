@@ -9,6 +9,7 @@ const dbUser         = process.env.SQL_USER                 || null;
 const dbName         = process.env.SQL_DB_NAME              || null;
 const env            = process.env.ENV                      || null;
 const country        = process.env.COUNTRY                  || null;
+const project        = process.env.PROJECT                  || null;
 
 
 if(connectionName === null)
@@ -30,6 +31,10 @@ if( env           === null)
 if( country       === null)
 {
   throw new Error('env var not defined : COUNTRY'                 );
+}
+if( project       === null)
+{
+  throw new Error('env var not defined : PROJECT'                 );
 }
 
 const mysqlConfig = {
@@ -61,7 +66,7 @@ async function initMySQL(secretName) {
 
 async function getSecret(secretName){
   // Access the secret.
-  let secretPath = "projects/rq-"+country+"-"+env+"/secrets/"+secretName+"/versions/latest";
+  let secretPath = "projects/"+project+"-"+country+"-"+env+"/secrets/"+secretName+"/versions/latest";
   console.trace("accessing secret with path "+secretPath);
   const [accessResponse] = await secretManagerServiceClient.accessSecretVersion({name: secretPath});
   return accessResponse.payload.data.toString('utf8');
