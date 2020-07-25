@@ -1,13 +1,9 @@
 'use strict';
 const common    = require('./common');
 
-const {PubSub}  = require('@google-cloud/pubsub');
-
+const {PubSub}        = require('@google-cloud/pubsub');
 const topicName       = 'ul_update';
 const pubsubClient    = new PubSub();
-
-const publishBetweenUlDelay = 400;
-
 
 function handleError(err){
   if (err && err.name === 'PartialFailureError') {
@@ -22,25 +18,22 @@ function handleError(err){
 
 const queryStr = `
 SELECT u.id, u.name, u.phone, u.latitude, u.longitude, u.address, u.postal_code, u.city, u.external_id, u.email, 
-       u.id_structure_rattachement, u.date_demarrage_activite, u.date_demarrage_rcq, u.publicDashboard, u.spotfire_access_token,
-       us.id as settings_id, us.settings
-FROM   ul u,
-       ul_settings us
+       u.id_structure_rattachement, u.date_demarrage_activite, u.date_demarrage_rcq, u.publicDashboard, u.spotfire_access_token
+FROM   ul u
 WHERE  u.date_demarrage_rcq is not null
-AND    u.id = us.ul_id
-ORDER BY date_demarrage_rcq asc
+ORDER BY date_demarrage_rcq
 `;
 
 /**
  * Cloud Scheduler "trigger_ul_update" publish an empty message on "trigger_ul_update"
  * This function : ULTriggerRecompute Cloud Function is listening
  *
- * roles :  roles/cloudsql.client
+ * roles :  roles/cloudsql.client;roles/secretmanager.secretAccessor;roles/pubsub.publisher;roles/pubsub.subscriber
  **/
 exports.ULTriggerRecompute = async (event, context) => {
 
 
-  console.error("start of processing");
+  console.error("ULTriggerRecompute - start of processing");
   // Initialize the pool lazily, in case SQL access isn't needed for this
   // GCF instance. Doing so minimizes the number of active SQL connections,
   // which helps keep your GCF instances under SQL connection limits.
@@ -60,37 +53,19 @@ exports.ULTriggerRecompute = async (event, context) => {
         //console.error(logMessage);
         if(results !== undefined && Array.isArray(results) && results.length >= 1)
         {
-          let i=0;
-          results.forEach( (ul) => {
-            i++;
-            const dataBuffer    = Buffer.from(JSON.stringify(ul));
-            // in order to not hammer the MySQL instance
-            // the publish on the topic is done every 400 secondes
-            // by taking the index (i) * 400 as a delay for setTimeout
-            setTimeout(function()
-                       {
-                         pubsubClient
-                         .topic     (topicName)
-                         .publish   (dataBuffer)
-                         .then      ((data)=>{
-                           console.error("Published 1 message on topic '"+topicName+"' "+JSON.stringify(ul) + " data:"+JSON.stringify(data));
+          const data        = {currentIndex:0, uls:results};
+          const dataBuffer  = Buffer.from(JSON.stringify(data));
 
-                         })
-                         .catch(err=>{
-                           handleError(err);
-                         });
-                       }, i*publishBetweenUlDelay);
-          });
-
-          let logMessage = "Number of UL triggered for recomputed : "+i+" results size :"+results.length;
-          console.error(logMessage);
-
-          //before returning resolve, we must wait for all the setTimeout to execute
-          //A cloud function can't exceed 9minutes of exec : 1350messages at 1msg every 400ms
-          setTimeout(function()
-           {
-             resolve(logMessage);
-           }, (i+5)*publishBetweenUlDelay);
+          pubsubClient
+            .topic     (topicName)
+            .publish   (dataBuffer)
+            .then      ((dataResult)=>{
+              console.trace("Published 1 message on topic '"+topicName+"' "+JSON.stringify(dataResult), data);
+              resolve("ULTriggerRecompute done with "+results.length+" UL");
+            })
+            .catch(err=>{
+              handleError(err);
+            });
 
         }
         else
