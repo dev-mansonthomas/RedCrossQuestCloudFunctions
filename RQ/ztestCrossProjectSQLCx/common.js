@@ -1,9 +1,5 @@
 'use strict';
-const mysql                        = require('mysql');
-
-const {SecretManagerServiceClient} = require('@google-cloud/secret-manager');
-const secretManagerServiceClient   = new SecretManagerServiceClient();
-
+const functionName   = process.env.FUNCTION_TARGET          || null;
 const connectionName = process.env.INSTANCE_CONNECTION_NAME || null;
 const dbUser         = process.env.SQL_USER                 || null;
 const dbName         = process.env.SQL_DB_NAME              || null;
@@ -11,6 +7,10 @@ const env            = process.env.ENV                      || null;
 const country        = process.env.COUNTRY                  || null;
 const project        = process.env.PROJECT                  || null;
 
+if(functionName === null)
+{
+  throw new Error('env var not defined : FUNCTION_TARGET');
+}
 
 if(connectionName === null)
 {
@@ -36,6 +36,15 @@ if( project       === null)
 {
   throw new Error('env var not defined : PROJECT'                 );
 }
+
+const mysql                        = require('mysql');
+
+const {SecretManagerServiceClient} = require('@google-cloud/secret-manager');
+const secretManagerServiceClient   = new SecretManagerServiceClient();
+
+const { Logging } = require('@google-cloud/logging');
+const logging     = new Logging();
+const logger      = logging.log(functionName);
 
 const mysqlConfig = {
   connectionLimit : 1,
@@ -87,9 +96,38 @@ function setCors(request, response)
   return false;
 }
 
+const METADATA = {
+  resource: {
+    type: 'cloud_function',
+    labels: {
+      function_name: functionName,
+      region: 'europe-west1'
+    }
+  }
+}
+;
+
+async function log(severity, message, extraData)
+{
+  const logData = {
+    data: extraData,
+    severity: severity,
+
+    // Optional 'message' property will show up in the Firebase
+    // console and other human-readable logging surfaces
+    message: message
+  };
+
+
+  return log.write(log.entry(METADATA, logData));
+}
+
+
+
 module.exports = {
   initMySQL: initMySQL,
   getSecret: getSecret,
   setCors  : setCors  ,
-  mysqlPool: mysqlPool
+  mysqlPool: mysqlPool,
+  log      : log
 };
