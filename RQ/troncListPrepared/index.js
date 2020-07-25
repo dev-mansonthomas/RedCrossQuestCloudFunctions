@@ -51,7 +51,11 @@ exports.troncListPrepared = functions.https.onCall(async (data, context) => {
   const name    = context.auth.token.name    || null;
   const email   = context.auth.token.email   || null;
 
-  console.log("troncListPrepared - uid='"+uid+"', name='"+name+"', email='"+email+"'");
+  common.log('TRACE', 'troncListPrepared starting', {uid:uid, name:name, email:email});
+  common.log('INFO', 'troncListPrepared starting', {uid:uid, name:name, email:email});
+  common.log('WARN', 'troncListPrepared starting', {uid:uid, name:name, email:email});
+  common.log('ERROR', 'troncListPrepared starting', {uid:uid, name:name, email:email});
+  common.log('CRITICAL', 'troncListPrepared starting', {uid:uid, name:name, email:email});
 
   let queteurData = await common_firestore.getQueteurFromFirestore(uid);
 
@@ -62,19 +66,19 @@ exports.troncListPrepared = functions.https.onCall(async (data, context) => {
       (err, results) => {
         if (err)
         {
-          console.error(err);
+          common.log('ERROR', 'troncListPrepared error while querying MySQL', {queryStr:queryStr, mysqlArgs:[queteurData.ul_id, queteurData.queteur_id], exception:err});
           reject(err);
         }
         else
         {
           if(results !== undefined && Array.isArray(results) && results.length >= 1)
           {
-            console.debug("found preparedTronc for queteurwith id '"+queteurData.queteur_id+"' and ul_id='"+queteurData.ul_id+"' for firestore queteurs(uid='"+uid+"') : " +JSON.stringify(results));
+            common.log('INFO', 'troncListPrepared - found preparedTronc for queteur ', {uid:uid, name:name, email:email, queteurId:queteurData.queteur_id, queteurUlId:queteurData.ul_id, results:JSON.stringify(results)});
             resolve(JSON.stringify(results));
           }
           else
           {
-            console.error("no preparedTronc found for queteur with id '"+queteurData.queteur_id+"' and ul_id='"+queteurData.ul_id+"' for firestore queteurs(uid='"+uid+"') "+JSON.stringify(results));
+            common.log('ERROR', 'troncListPrepared - no preparedTronc found for queteur ', {uid:uid, name:name, email:email, queteurId:queteurData.queteur_id, queteurUlId:queteurData.ul_id, results:JSON.stringify(results)});
             resolve(JSON.stringify([]));
           }
         }
