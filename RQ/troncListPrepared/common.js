@@ -117,9 +117,16 @@ async function log(severity, message, extraData)
     // console and other human-readable logging surfaces
     message: message
   };
+  
+  try
+  {
+    return logger.write(logger.entry(METADATA, logData));
+  }
+  catch(exception)
+  {
+    console.error('error while logging to stack driver', [logData,exception]);
+  }
 
-
-  return log.write(log.entry(METADATA, logData));
 }
 
 
