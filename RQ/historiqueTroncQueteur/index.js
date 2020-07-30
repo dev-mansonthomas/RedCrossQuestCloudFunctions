@@ -92,12 +92,10 @@ exports.historiqueTroncQueteur = functions.https.onCall(async (data, context) =>
   const name    = context.auth.token.name    || null;
   const email   = context.auth.token.email   || null;
 
-  console.log("historiqueTroncQueteur - uid='"+uid+"', name='"+name+"', email='"+email+"'");
+  common.logDebug("historiqueTroncQueteur - uid='"+uid+"', name='"+name+"', email='"+email+"'");
 
   let queteurData = await common_firestore.getQueteurFromFirestore(uid);
 
-  console.log("queteurData:"+JSON.stringify(queteurData));
-  
   return new Promise((resolve, reject) => {
 
     if(
@@ -110,20 +108,20 @@ exports.historiqueTroncQueteur = functions.https.onCall(async (data, context) =>
       )
     )
     {// if the data is fresh enough, return the cached data
-      console.log("historique tronc_queteur retrieved from cache "+JSON.stringify(queteurData));
+      common.logDebug("historique tronc_queteur retrieved from cache ",queteurData);
       resolve(queteurData.historiqueTQ);
     }
     else
     {// cache miss or data too old
-      console.log("historique tronc_queteur cache miss for queteur id "+queteurData.queteur_id);
-
+      common.logDebug("historique tronc_queteur cache miss for queteur"+{queteurId:queteurData.queteur_id});
+      const queryArgs = [queteurData.queteur_id, queteurData.ul_id];
       mysqlPool.query(
         queryStr,
-        [queteurData.queteur_id, queteurData.ul_id],
+        queryArgs,
         (err, results) => {
           if (err)
           {
-            console.error(err);
+            common.logError("error while running query ", {queryStr:queryStr, mysqlArgs:queryArgs, exception:err});
             reject(err);
           }
           else
@@ -140,7 +138,7 @@ exports.historiqueTroncQueteur = functions.https.onCall(async (data, context) =>
             (
               ()=>{resolve(myResults);}
             ).catch(updateError=>{
-              console.error(updateError);
+              common.logError("firestore udpate", updateError);
               reject(updateError);
             });
           }

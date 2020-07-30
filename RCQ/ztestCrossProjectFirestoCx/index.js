@@ -18,7 +18,7 @@ exports.ztestCrossProjectFirestoCx = (req, res) => {
     res.status(200).send(JSON.stringify({'queteur_collection_size':snap.size}));
   })
   .catch(function(error) {
-    console.log("Error while counting documents in queteur collection", error);
+    common.logError("Error while counting documents in queteur collection", error);
     res.status(500).send(JSON.stringify(error));
   });
 };

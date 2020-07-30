@@ -57,31 +57,32 @@ exports.findQueteurById = functions.https.onCall( async (data, context) => {
   const name    = context.auth.token.name    || null;
   const email   = context.auth.token.email   || null;
 
-  console.log("findQueteurById - uid='"+uid+"', name='"+name+"', email='"+email+"'");
+  common.logDebug("findQueteurById - uid='"+uid+"', name='"+name+"', email='"+email+"'");
 
   let queteurData = await common_firestore.getQueteurFromFirestore(uid);
 
   return new Promise((resolve, reject) => {
+    const queryArgs = [queteurData.ul_id, queteurData.queteur_id];
     mysqlPool.query(
       queryStr,
-      [queteurData.ul_id, queteurData.queteur_id],
+      queryArgs,
       (err, results) => {
         if (err)
         {
-          console.error(err);
+          common.logError("error while running query ", {queryStr:queryStr, mysqlArgs:queryArgs, exception:err});
           reject(err);
         }
         else
         {
           if(results !== undefined && Array.isArray(results) && results.length === 1)
           {
-            console.debug("found queteur with id '"+queteurData.queteur_id+"' and ul_id='"+queteurData.ul_id+"' for firestore queteurs(uid='"+uid+"') : " +JSON.stringify(results[0]));
+            common.logDebug("found queteur with id '"+queteurData.queteur_id+"' and ul_id='"+queteurData.ul_id+"' for firestore queteurs(uid='"+uid+"') : " , results[0]);
             resolve(JSON.stringify(results[0]));
           }
           else
           {
-            let message= "no queteur found with id '"+queteurData.queteur_id+"' and ul_id='"+queteurData.ul_id+"' for firestore queteurs(uid='"+uid+"'), results : " + JSON.stringify(results);
-            console.error(message);
+            let message= "no queteur found with id '"+queteurData.queteur_id+"' and ul_id='"+queteurData.ul_id+"' for firestore queteurs(uid='"+uid+"')";
+            common.logError(message, results);
             reject(message);
           }
         }

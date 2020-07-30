@@ -30,7 +30,7 @@ exports.troncSetDepartOrRetour = functions.https.onCall(async (data, context) =>
   const name    = context.auth.token.name    || null;
   const email   = context.auth.token.email   || null;
 
-  console.log("troncSetDepartOrRetour - uid='"+uid+"', name='"+name+"', email='"+email+"'");
+  common.logDebug("troncSetDepartOrRetour - uid='"+uid+"', name='"+name+"', email='"+email+"'");
 
   let isDepart = data.isDepart;
   let date     = data.date;
@@ -41,26 +41,27 @@ exports.troncSetDepartOrRetour = functions.https.onCall(async (data, context) =>
   let queteurData = await common_firestore.getQueteurFromFirestore(uid);
 
   return new Promise((resolve, reject) => {
+    const queryArgs = [date, tqId, queteurData.ul_id, queteurData.queteur_id];
     mysqlPool.query(
       queryStr,
-      [date, tqId, queteurData.ul_id, queteurData.queteur_id],
+      queryArgs,
       (err, results) => {
         if (err)
         {
-          console.error(err);
+          common.logError("error while running query ", {queryStr:queryStr, mysqlArgs:queryArgs, exception:err});
           reject(err);
         }
         else
         {
           if(results !== undefined && results.affectedRows === 1)
           {
-            console.debug(`Update Depart/Tronc (isDepart='${isDepart}') tqId='${tqId}', ulId='${queteurData.ul_id}' queteurId='${queteurData.queteur_id}' did update one row with query ${queryStr}`);
+            common.logDebug(`Update Depart/Tronc (isDepart='${isDepart}') tqId='${tqId}', ulId='${queteurData.ul_id}' queteurId='${queteurData.queteur_id}' did update one row with query ${queryStr}`);
             resolve(JSON.stringify({success:true}));
           }
           else
           {
 
-            console.error(`Update Depart/Tronc (isDepart='${isDepart}') tqId='${tqId}', ulId='${queteurData.ul_id}' queteurId='${queteurData.queteur_id}' did not update the correct number of row (ie : 1) with query '${queryStr}' affectedRows: ${results.affectedRows} `+JSON.stringify([date, tqId, ulId, queteurId]));
+            common.logError(`Update Depart/Tronc (isDepart='${isDepart}') tqId='${tqId}', ulId='${queteurData.ul_id}' queteurId='${queteurData.queteur_id}' did not update the correct number of row (ie : 1) with query '${queryStr}' affectedRows: ${results.affectedRows} `, {date:date, troncQueteurId:tqId, ulId:queteurData.ul_id, queteurId:queteurData.queteur_id});
             reject(JSON.stringify({success:false, message:`incorrect number of rows updated: ${results.affectedRows}`}));
           }
         }

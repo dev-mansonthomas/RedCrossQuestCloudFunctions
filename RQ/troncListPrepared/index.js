@@ -51,34 +51,32 @@ exports.troncListPrepared = functions.https.onCall(async (data, context) => {
   const name    = context.auth.token.name    || null;
   const email   = context.auth.token.email   || null;
 
-  common.log('TRACE', 'troncListPrepared starting', {uid:uid, name:name, email:email});
-  common.log('INFO', 'troncListPrepared starting', {uid:uid, name:name, email:email});
-  common.log('WARN', 'troncListPrepared starting', {uid:uid, name:name, email:email});
-  common.log('ERROR', 'troncListPrepared starting', {uid:uid, name:name, email:email});
-  common.log('CRITICAL', 'troncListPrepared starting', {uid:uid, name:name, email:email});
+  common.logTrace('TRACE', 'troncListPrepared starting', {uid:uid, name:name, email:email});
 
   let queteurData = await common_firestore.getQueteurFromFirestore(uid);
 
   return new Promise((resolve, reject) => {
+
+    const queryArgs = [queteurData.ul_id, queteurData.queteur_id];
     mysqlPool.query(
       queryStr,
-      [queteurData.ul_id, queteurData.queteur_id],
+      queryArgs,
       (err, results) => {
         if (err)
         {
-          common.log('ERROR', 'troncListPrepared error while querying MySQL', {queryStr:queryStr, mysqlArgs:[queteurData.ul_id, queteurData.queteur_id], exception:err});
+          common.logError("error while running query ", {queryStr:queryStr, mysqlArgs:queryArgs, exception:err});
           reject(err);
         }
         else
         {
           if(results !== undefined && Array.isArray(results) && results.length >= 1)
           {
-            common.log('INFO', 'troncListPrepared - found preparedTronc for queteur ', {uid:uid, name:name, email:email, queteurId:queteurData.queteur_id, queteurUlId:queteurData.ul_id, results:JSON.stringify(results)});
+            common.logDebug('troncListPrepared - found preparedTronc for queteur ', {uid:uid, name:name, email:email, queteurId:queteurData.queteur_id, queteurUlId:queteurData.ul_id, results:JSON.stringify(results)});
             resolve(JSON.stringify(results));
           }
           else
           {
-            common.log('ERROR', 'troncListPrepared - no preparedTronc found for queteur ', {uid:uid, name:name, email:email, queteurId:queteurData.queteur_id, queteurUlId:queteurData.ul_id, results:JSON.stringify(results)});
+            common.logError('troncListPrepared - no preparedTronc found for queteur ', {uid:uid, name:name, email:email, queteurId:queteurData.queteur_id, queteurUlId:queteurData.ul_id, results:JSON.stringify(results)});
             resolve(JSON.stringify([]));
           }
         }

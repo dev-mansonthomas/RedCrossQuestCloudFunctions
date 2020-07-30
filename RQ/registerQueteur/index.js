@@ -42,17 +42,19 @@ exports.registerQueteur = functions.https.onCall(async (data, context) => {
 
 
   return new Promise((resolve, reject) => {
-    mysqlPool.query(queryStr,
-      [first_name, last_name, man, birthdate, email, secteur, nivol, mobile, ul_registration_token, queteur_reg_token],
+    const queryArgs = [first_name, last_name, man, birthdate, email, secteur, nivol, mobile, ul_registration_token, queteur_reg_token];
+    mysqlPool.query(
+      queryStr,
+      queryArgs,
       (err, results) => {
         if (err)
         {
-          console.error(err);
+          common.logError("error while running query ", {queryStr:queryStr, mysqlArgs:queryArgs, exception:err});
           reject(err);
         }
         else
         {
-          console.info("registering "+email+" "+queteur_reg_token);
+          common.logInfo("registering "+email+" "+queteur_reg_token);
           resolve(JSON.stringify({"queteur_registration_token":queteur_reg_token}));
         }
       });

@@ -76,7 +76,7 @@ async function initMySQL(secretName) {
 async function getSecret(secretName){
   // Access the secret.
   let secretPath = "projects/"+project.toLowerCase()+"-"+country+"-"+env+"/secrets/"+secretName+"/versions/latest";
-  console.log("accessing secret with path "+secretPath);
+  logDebug("accessing secret with path "+secretPath);
   const [accessResponse] = await secretManagerServiceClient.accessSecretVersion({name: secretPath});
   return accessResponse.payload.data.toString('utf8');
 }
@@ -107,35 +107,118 @@ const METADATA = {
 }
 ;
 
-async function log(severity, message, extraData)
+async function logCritical(message, extraData)
 {
   const logData = {
     data: extraData,
-    severity: severity,
-
-    // Optional 'message' property will show up in the Firebase
-    // console and other human-readable logging surfaces
+    severity: 'critical',
     message: message
   };
 
+  try
+  {
+    return logger.critical(logger.entry(METADATA, logData));
+  }
+  catch(exception)
+  {//fall back ton console.error
+    console.error('error while logging to stack driver', [logData,exception]);
+  }
+}
+
+async function logError(message, extraData)
+{
+  const logData = {
+    data: extraData,
+    severity: 'error',
+    message: message
+  };
+  
+  try
+  {
+    return logger.error(logger.entry(METADATA, logData));
+  }
+  catch(exception)
+  {//fall back ton console.error
+    console.error('error while logging to stack driver', [logData,exception]);
+  }
+}
+
+async function logWarn(message, extraData)
+{
+  const logData = {
+    data: extraData,
+    severity: 'warning',
+    message: message
+  };
 
   try
   {
-    return log.write(log.entry(METADATA, logData));
+    return logger.warn(logger.entry(METADATA, logData));
   }
   catch(exception)
-  {
-    console.error('error while logging to stack driver', [logData,exception]);
+  {//fall back ton console.error
+    console.warn('error while logging to stack driver', [logData,exception]);
   }
-
 }
 
 
+async function logDebug(severity, message, extraData)
+{
+  const logData = {
+    data: extraData,
+    severity: 'debug',
+    message: message
+  };
+
+  try
+  {
+    return logger.debug(logger.entry(METADATA, logData));
+  }
+  catch(exception)
+  {//fall back ton console.error
+    console.debug('error while logging to stack driver', [logData,exception]);
+  }
+}
+
+async function logInfo(severity, message, extraData)
+{
+  const logData = {
+    data: extraData,
+    severity: 'info',
+    message: message
+  };
+
+  try
+  {
+    return logger.info(logger.entry(METADATA, logData));
+  }
+  catch(exception)
+  {//fall back ton console.error
+    console.info('error while logging to stack driver', [logData,exception]);
+  }
+}
+
+
+function handleFirestoreError(err){
+  if (err && err.name === 'PartialFailureError') {
+    if (err.errors && err.errors.length > 0) {
+      common.logError('Insert errors:');
+      err.errors.forEach(err => common.logError(err));
+    }
+  } else {
+    common.logError('ERROR:', err);
+  }
+}
 
 module.exports = {
-  initMySQL: initMySQL,
-  getSecret: getSecret,
-  setCors  : setCors  ,
-  mysqlPool: mysqlPool,
-  log      : log
+  initMySQL   : initMySQL,
+  getSecret   : getSecret,
+  setCors     : setCors  ,
+  mysqlPool   : mysqlPool,
+  logCritical : logCritical,
+  logError    : logError,
+  logWarn     : logWarn,
+  logInfo     : logInfo,
+  logDebug    : logDebug,
+  handleFirestoreError:handleFirestoreError
 };

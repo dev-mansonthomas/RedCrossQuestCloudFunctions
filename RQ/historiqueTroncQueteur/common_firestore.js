@@ -12,8 +12,6 @@ async function getQueteurFromFirestore(uid)
     .doc(uid)
     .get();
 
-  console.log("getQueteurFromFirestore - "+JSON.stringify(queteurPromise));
-  
   if (queteurPromise.exists)
   {
     return queteurPromise.data();

@@ -74,17 +74,6 @@ const queryStr = `
   group by tq.ul_id, tq.queteur_id, q.first_name, q.last_name,  year                                
 `;
 
-function handleError(err){
-  if (err && err.name === 'PartialFailureError') {
-    if (err.errors && err.errors.length > 0) {
-      console.log('Insert errors:');
-      err.errors.forEach(err => console.error(err));
-    }
-  } else {
-    console.error('ERROR:', err);
-  }
-}
-
 /***
  * Cloud Scheduler "trigger_ul_update" publish an empty message on "trigger_ul_update"
  * ULTriggerRecompute Cloud Function is listening, on reception it will trigger stats recompute every 400ms
@@ -107,12 +96,12 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
 
   if(!Array.isArray(uls))
   {
-    console.error("uls is not an array", uls);
+    common.logError("uls is not an array", uls);
     return;
   }
   if(currentIndex >= uls.length )
   {
-    console.error("currentIndex is greater than array size", uls);
+    common.logError("currentIndex is greater than array size", uls);
     return;
   }
 
@@ -124,7 +113,7 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
   //delete current stats of the UL
   let deleteCollection = function(path)
   {
-    console.log("removing documents on collection '"+path+"' for ul_id="+ul_id);
+    common.logInfo("removing documents on collection '"+path+"' for ul_id="+ul_id);
     // Get a new write batch
     let batch = common_firestore.firestore.batch();
 
@@ -134,11 +123,11 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
       .get()
       .then(
         querySnapshot => {
-          console.log(`Start of deletion : '${querySnapshot.size}' documents for UL '${ul_id}'`);
+          common.logDebug(`Start of deletion : '${querySnapshot.size}' documents for UL '${ul_id}'`);
           querySnapshot.forEach(documentSnapshot => {
             batch.delete(documentSnapshot.ref);
           });
-          console.log("commit of deletion for UL '${ul_id}'");
+          common.logDebug("commit of deletion for UL '${ul_id}'");
           return batch.commit();
         });
   };
@@ -149,14 +138,15 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
     deleteCollection(fsCollectionName).then(
       ()=>
       {
+        const queryArgs = [ul_id];
         mysqlPool.query(
           queryStr,
-          [ul_id],
+          ul_id,
           (err, results) => {
 
             if (err)
             {
-              console.error("Error while querying MySQL with query "+queryStr, err);
+              common.logError("error while running query ", {queryStr:queryStr, mysqlArgs:queryArgs, exception:err});
               reject(err);
             }
             else
@@ -178,7 +168,7 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
                 return batch.commit().then(() => {
 
                   let logMessage = "ULQueteurStatsPerYear for UL='"+ul_name+"'("+ul_id+") : "+i+" rows inserted";
-                  console.log(logMessage);
+                  common.logDebug(logMessage);
 
                   parsedObject.currentIndex = currentIndex++;
                   const newDataBuffer  = Buffer.from(JSON.stringify(parsedObject));  
@@ -187,18 +177,18 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
                     .topic     (topicName)
                     .publish   (newDataBuffer)
                     .then      ((dataResult)=>{
-                      console.trace("Published 1 message to process next UL on topic '"+topicName+"' "+JSON.stringify(dataResult), parsedObject);
+                      common.logDebug("Published 1 message to process next UL on topic '"+topicName+"' "+JSON.stringify(dataResult), parsedObject);
                       resolve(logMessage);
                     })
                     .catch(err=>{
-                      handleError(err);
+                      common.handleFirestoreError(err);
                     });
                 });
               }
               else
               {
                 let logMessage = "query for UL '"+ul_id+"' returned no row "+queryStr+" results : "+JSON.stringify(results);
-                console.log(logMessage);
+                common.logInfo(logMessage);
                 resolve(logMessage);
               }
             }

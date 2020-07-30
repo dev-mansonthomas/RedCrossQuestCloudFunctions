@@ -5,17 +5,6 @@ const {PubSub}        = require('@google-cloud/pubsub');
 const topicName       = 'ul_update';
 const pubsubClient    = new PubSub();
 
-function handleError(err){
-  if (err && err.name === 'PartialFailureError') {
-    if (err.errors && err.errors.length > 0) {
-      console.log('Insert errors:');
-      err.errors.forEach(err => console.error(err));
-    }
-  } else {
-    console.error('ERROR:', err);
-  }
-}
-
 const queryStr = `
 SELECT u.id, u.name, u.phone, u.latitude, u.longitude, u.address, u.postal_code, u.city, u.external_id, u.email, 
        u.id_structure_rattachement, u.date_demarrage_activite, u.date_demarrage_rcq, u.publicDashboard, u.spotfire_access_token
@@ -33,7 +22,7 @@ ORDER BY date_demarrage_rcq
 exports.ULTriggerRecompute = async (event, context) => {
 
 
-  console.error("ULTriggerRecompute - start of processing");
+  common.logDebug("ULTriggerRecompute - start of processing");
   // Initialize the pool lazily, in case SQL access isn't needed for this
   // GCF instance. Doing so minimizes the number of active SQL connections,
   // which helps keep your GCF instances under SQL connection limits.
@@ -44,7 +33,7 @@ exports.ULTriggerRecompute = async (event, context) => {
     (err, results) => {
       if (err)
       {
-        console.error(err);
+        common.logError("error while running query ", {queryStr:queryStr, mysqlArgs:[], exception:err});
         reject(err);
       }
       else
@@ -60,22 +49,21 @@ exports.ULTriggerRecompute = async (event, context) => {
             .topic     (topicName)
             .publish   (dataBuffer)
             .then      ((dataResult)=>{
-              console.trace("Published 1 message on topic '"+topicName+"' "+JSON.stringify(dataResult), data);
+              common.logDebug("Published 1 message on topic '"+topicName+"'", {dataResult:dataResult, data:data});
               resolve("ULTriggerRecompute done with "+results.length+" UL");
             })
             .catch(err=>{
-              handleError(err);
+              common.handleFirestoreError
             });
 
         }
         else
         {
           let logMessage="No UL enabled for RCQ found... weird... ";
-          console.error(logMessage);
+          common.logError(logMessage);
           reject(logMessage);
         }
       }
     });
   });
-
 };

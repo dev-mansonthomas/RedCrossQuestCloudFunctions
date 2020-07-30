@@ -9,9 +9,6 @@ function checkAuthentication(context)
     throw new functions.https.HttpsError('failed-precondition', 'The function must be called while authenticated.');
   }
 }
-
-
-
 module.exports = {
   checkAuthentication : checkAuthentication,
 };

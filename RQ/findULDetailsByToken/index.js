@@ -61,11 +61,14 @@ exports.findULDetailsByToken = async (req, res) => {
   }
 
   return new Promise((resolve, reject) => {
-    mysqlPool.query(queryStr, [token, token],
+    const queryArgs = [token, token];
+    mysqlPool.query(
+      queryStr,
+      queryArgs,
       (err, results) => {
         if (err)
         {
-          console.error(err);
+          common.logError("error while running query ", {queryStr:queryStr, mysqlArgs:queryArgs, exception:err});
           res.status(500).send(JSON.stringify(err));
           reject(err);
         }
@@ -78,14 +81,14 @@ exports.findULDetailsByToken = async (req, res) => {
           }
           else
           {
-            console.log("query returned incorrect number of rows with token '"+token+"'"+ JSON.stringify(results) );
+            common.logWarn("query returned incorrect number of rows with token '"+token+"'", results);
             res.status(200).send(JSON.stringify([]));
           }
 
         }
       });
   }).catch((err) =>{
-    console.info(err.message, JSON.stringify(err));
+    common.logError(err.message, err);
     res.status(500).send(JSON.stringify(err));
   });
 };
