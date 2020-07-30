@@ -51,7 +51,7 @@ exports.troncListPrepared = functions.https.onCall(async (data, context) => {
   const name    = context.auth.token.name    || null;
   const email   = context.auth.token.email   || null;
 
-  common.logTrace('TRACE', 'troncListPrepared starting', {uid:uid, name:name, email:email});
+  common.logDebug('troncListPrepared starting', {uid:uid, name:name, email:email});
 
   let queteurData = await common_firestore.getQueteurFromFirestore(uid);
 
