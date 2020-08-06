@@ -168,7 +168,6 @@ function handleFirestoreError(err){
 module.exports = {
   getSecret   : getSecret,
   setCors     : setCors  ,
-  mysqlPool   : mysqlPool,
   logError    : logError,
   logWarn     : logWarn,
   logInfo     : logInfo,

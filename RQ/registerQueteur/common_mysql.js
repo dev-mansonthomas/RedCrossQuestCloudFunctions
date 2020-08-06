@@ -1,6 +1,4 @@
 'use strict';
-const common         = require('./common');
-
 const connectionName = process.env.INSTANCE_CONNECTION_NAME || null;
 const dbUser         = process.env.SQL_USER                 || null;
 const dbName         = process.env.SQL_DB_NAME              || null;
