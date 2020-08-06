@@ -1,5 +1,6 @@
 'use strict';
-const common    = require('./common');
+const common        = require('./common');
+const common_mysql  = require('./common_mysql');
 
 const {PubSub}        = require('@google-cloud/pubsub');
 const topicName       = 'ul_update';
@@ -26,7 +27,7 @@ exports.ULTriggerRecompute = async (event, context) => {
   // Initialize the pool lazily, in case SQL access isn't needed for this
   // GCF instance. Doing so minimizes the number of active SQL connections,
   // which helps keep your GCF instances under SQL connection limits.
-  let mysqlPool = await common.initMySQL('MYSQL_USER_READ');
+  let mysqlPool = await common_mysql.initMySQL('MYSQL_USER_READ');
 
   return new Promise((resolve, reject) => {
     mysqlPool.query(queryStr, [],
