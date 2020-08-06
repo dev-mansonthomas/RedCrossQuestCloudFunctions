@@ -2,6 +2,7 @@
 const common              = require('./common');
 const common_firestore    = require('./common_firestore');
 const common_firebase     = require('./common_firebase' );
+const common_mysql        = require('./common_mysql');
 
 const functions = require('firebase-functions');
 const admin     = require('firebase-admin');
@@ -51,7 +52,7 @@ const queryStr = `
 // retrieve Queteur Info from it's ID in RCQ DB
 exports.findQueteurById = functions.https.onCall( async (data, context) => {
   common_firebase.checkAuthentication(context);
-  let mysqlPool = await common.initMySQL('MYSQL_USER_READ');
+  let mysqlPool = await common_mysql.initMySQL('MYSQL_USER_READ');
 
   const uid     = context.auth.uid;
   const name    = context.auth.token.name    || null;
