@@ -1,6 +1,7 @@
 'use strict';
 const common              = require('./common');
 const common_firestore    = require('./common_firestore');
+const common_mysql        = require('./common_mysql');
 
 const {PubSub}        = require('@google-cloud/pubsub');
 const topicName       = 'ul_update';
@@ -108,7 +109,7 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
   const ul_id         = uls[currentIndex].id;
   const ul_name       = uls[currentIndex].name;
 
-  let mysqlPool = await common.initMySQL('MYSQL_USER_READ');
+  let mysqlPool = await common_mysql.initMySQL('MYSQL_USER_READ');
 
   //delete current stats of the UL
   let deleteCollection = function(path)
