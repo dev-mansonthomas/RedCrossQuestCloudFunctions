@@ -1,9 +1,10 @@
 'use strict';
 const common    = require('./common');
+const common_mysql        = require('./common_mysql');
 
 exports.ztestCrossProjectSQLCx = async (req, res) => {
 
-  let mysqlPool = await common.initMySQL('MYSQL_USER_READ');
+  let mysqlPool = await common_mysql.initMySQL('MYSQL_USER_READ');
 
   const queryStr = `
 select count(1) as nb_tq
