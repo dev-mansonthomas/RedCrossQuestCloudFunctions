@@ -1,4 +1,6 @@
 'use strict';
+const common         = require('./common');
+
 const connectionName = process.env.INSTANCE_CONNECTION_NAME || null;
 const dbUser         = process.env.SQL_USER                 || null;
 const dbName         = process.env.SQL_DB_NAME              || null;
@@ -39,7 +41,7 @@ async function initMySQL(secretName) {
   if (!module.exports.mysqlPool)
   {
     // Access the secret.
-    mysqlConfig.password     = await getSecret(secretName);
+    mysqlConfig.password     = await common.getSecret(secretName);
     module.exports.mysqlPool = mysql.createPool(mysqlConfig);
   }
   return module.exports.mysqlPool;
