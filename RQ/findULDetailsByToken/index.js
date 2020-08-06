@@ -1,5 +1,6 @@
 'use strict';
-const common    = require('./common');
+const common        = require('./common');
+const common_mysql  = require('./common_mysql');
 
 const queryStr = `
   SELECT  us.id as settings_id,       
@@ -48,7 +49,7 @@ exports.findULDetailsByToken = async (req, res) => {
   let token  = req.query.token;
   let params = {};
 
-  let mysqlPool = await common.initMySQL('MYSQL_USER_READ');
+  let mysqlPool = await common_mysql.initMySQL('MYSQL_USER_READ');
 
   if(
    !( token         !== undefined &&
