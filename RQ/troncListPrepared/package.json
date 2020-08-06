@@ -2,6 +2,7 @@
   "name": "tronc_list_prepared",
   "description": "Cloud Functions for Firebase",
   "license": "GPL-3.0-or-later",
+  "version": "0.0.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dev-mansonthomas/RedCrossQuestCloudFunctions.git"
