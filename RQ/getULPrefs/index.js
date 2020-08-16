@@ -42,7 +42,7 @@ exports.getULPrefs = functions.https.onCall(async (data, context) => {
 
   let ulPrefsPromise = await firestoreRCQ
     .collection('ul_prefs')
-    .where('ul_id', '=', ul_id)
+    .where('ul_id', '==', ul_id)
     .get();
 
   if (ulPrefsPromise.exists)
@@ -51,6 +51,6 @@ exports.getULPrefs = functions.https.onCall(async (data, context) => {
   }
   else
   {//if not found, we serve the 2019 defaults
-    return {'rq_display_daily_stats':false, 'rq_display_queteur_ranking':'NON', 'rq_autonomous_depart_and_return':false};
+    return {'ul_id':0,'rq_display_daily_stats':false, 'rq_display_queteur_ranking':'NON', 'rq_autonomous_depart_and_return':false};
   }
 });
