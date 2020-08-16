@@ -40,6 +40,8 @@ exports.getULPrefs = functions.https.onCall(async (data, context) => {
 
   let ul_id = queteurPromise.data().ul_id;
 
+  common.logDebug("getULPrefs - ul_id='"+ul_id+"'");
+
   let ulPrefsPromise = await firestoreRCQ
     .collection('ul_prefs')
     .where('ul_id', '==', ul_id)
