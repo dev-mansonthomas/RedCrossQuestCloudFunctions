@@ -1,7 +1,7 @@
 'use strict';
 const common              = require('./common');
 const common_firebase     = require('./common_firebase' );
-const Firestore = require('@google-cloud/firestore');
+const Firestore           = require('@google-cloud/firestore');
 
 const firestoreRCQ = new Firestore ({projectId:process.env.TARGET_PROJECT_ID});
 const firestoreRQ  = new Firestore ();
@@ -49,10 +49,12 @@ exports.getULPrefs = functions.https.onCall(async (data, context) => {
 
   if (ulPrefsPromise.exists)
   {
+    common.logDebug("getULPrefs - ul_id='"+ul_id+"'"+JSON.encode(ulPrefsPromise.data()));
     return ulPrefsPromise.data();
   }
   else
   {//if not found, we serve the 2019 defaults
+    common.logDebug("getULPrefs - ul_id='"+ul_id+"' not found");
     return {'ul_id':0,'rq_display_daily_stats':false, 'rq_display_queteur_ranking':'NON', 'rq_autonomous_depart_and_return':false};
   }
 });
