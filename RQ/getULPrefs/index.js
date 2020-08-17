@@ -38,7 +38,7 @@ exports.getULPrefs = functions.https.onCall(async (data, context) => {
     return {'rq_display_daily_stats':false, 'rq_display_queteur_ranking':'NON', 'rq_autonomous_depart_and_return':false};
   }
 
-  let ul_id = queteurPromise.data().ul_id;
+  let ul_id = parseInt(queteurPromise.data().ul_id);
 
   common.logDebug("getULPrefs - ul_id='"+ul_id+"'");
 
