@@ -46,6 +46,7 @@ exports.getULPrefs = functions.https.onCall(async (data, context) => {
     .collection('ul_prefs')
     .where('ul_id', '==', ul_id)
     .get();
+  common.logDebug("", ulPrefsPromise);
 
   if (ulPrefsPromise.exists)
   {
