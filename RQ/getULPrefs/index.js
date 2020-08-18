@@ -46,12 +46,13 @@ exports.getULPrefs = functions.https.onCall(async (data, context) => {
     .collection('ul_prefs')
     .where('ul_id', '==', ul_id)
     .get();
-  common.logDebug("", ulPrefsPromise);
 
-  if (ulPrefsPromise.exists)
+  common.logDebug("ulPrefsPromise object after query", ulPrefsPromise);
+
+  if (ulPrefsPromise.size === 1)
   {
-    common.logDebug("getULPrefs - ul_id='"+ul_id+"'"+JSON.encode(ulPrefsPromise.data()));
-    return ulPrefsPromise.data();
+    common.logDebug("getULPrefs - ul_id='"+ul_id+"'"+JSON.encode(ulPrefsPromise));
+    return ulPrefsPromise.docs[1].data();
   }
   else
   {//if not found, we serve the 2019 defaults
