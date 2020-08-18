@@ -51,7 +51,7 @@ exports.getULPrefs = functions.https.onCall(async (data, context) => {
 
   if (ulPrefsPromise.size === 1)
   {
-    common.logDebug("getULPrefs - ul_id='"+ul_id+"'"+JSON.encode(ulPrefsPromise));
+    common.logDebug("getULPrefs - ul_id='"+ul_id+"'"+JSON.stringify(ulPrefsPromise.docs[1].data()));
     return ulPrefsPromise.docs[1].data();
   }
   else
