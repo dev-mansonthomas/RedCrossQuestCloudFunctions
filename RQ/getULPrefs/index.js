@@ -51,12 +51,12 @@ exports.getULPrefs = functions.https.onCall(async (data, context) => {
 
   if (ulPrefsPromise.size === 1)
   {
-    common.logDebug("getULPrefs - ul_id='"+ul_id+"'"+JSON.stringify(ulPrefsPromise.docs[1].data()));
-    return ulPrefsPromise.docs[1].data();
+    common.logDebug("getULPrefs - ul_id='"+ul_id+"'"+JSON.stringify(ulPrefsPromise.docs[0].data()));
+    return ulPrefsPromise.docs[0].data();
   }
   else
   {//if not found, we serve the 2019 defaults
-    common.logDebug("getULPrefs - ul_id='"+ul_id+"' not found");
+    common.logDebug("getULPrefs - ul_id='"+ul_id+"' not found or more than one result");
     return {'ul_id':0,'rq_display_daily_stats':false, 'rq_display_queteur_ranking':'NON', 'rq_autonomous_depart_and_return':false};
   }
 });
