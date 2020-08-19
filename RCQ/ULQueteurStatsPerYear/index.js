@@ -132,6 +132,7 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
 
       docs.forEach(doc =>{
         batch.delete(doc.ref);
+        i++;
       });
       common.logDebug("Committing a batch of deletion at index "+i);
       return batch.commit();
@@ -171,6 +172,7 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
                   docs.forEach(doc =>{
                     const docRef = collection.doc();
                     batch.set(docRef, JSON.parse(JSON.stringify(doc)));
+                    i++;
                   });
                   common.logDebug("Committing a batch of insertion at index "+i);
                   return batch.commit();
