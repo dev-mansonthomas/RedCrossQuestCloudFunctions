@@ -119,7 +119,7 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
   {
     common.logInfo("removing documents on collection '"+path+"' for ul_id="+ul_id);
     // Get a new write batch
-    let batch = common_firestore.firestore.batch();
+
 
     return common_firestore.firestore
       .collection(path)
@@ -128,11 +128,31 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
       .then(
         querySnapshot => {
           common.logDebug(`Start of deletion : '${querySnapshot.size}' documents for UL '${ul_id}'`);
+          
+          //batch can't make more than 500 writes, so we commit every 500
+          let i = 0;
+          let batch = null;
           querySnapshot.forEach(documentSnapshot => {
+
+            if(i%500 === 0)
+            {
+              common_firestore.firestore.batch();
+            }
+
             batch.delete(documentSnapshot.ref);
+            i++;
+            if(i%500 === 499)
+            {
+              batch.commit();
+            }
           });
+          //on last commit if we didn't finish with one
+          if(i%500 !== 499)
+          {
+            batch.commit();
+          }
+
           common.logDebug("commit of deletion for UL '${ul_id}'");
-          return batch.commit();
         });
   };
 
@@ -157,19 +177,35 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
             {
               if(Array.isArray(results) && results.length >= 1)
               {
-                const batch       = common_firestore.firestore.batch();
+                let   batch       = null;
                 const collection  = common_firestore.firestore.collection(fsCollectionName);
                 let i = 0;
+                let lastBatchCommit = null;
+
                 results.forEach(
                   (row) =>
                   {
+                    if(i%500 === 0)
+                    {
+                      common_firestore.firestore.batch();
+                    }
                     const docRef = collection.doc();
                     //otherwise we get this error from firestore : Firestore doesn’t support JavaScript objects with custom prototypes (i.e. objects that were created via the “new” operator)
                     batch.set(docRef, JSON.parse(JSON.stringify(row)));
                     i++;
+                    if(i%500 === 499)
+                    {
+                      lastBatchCommit =batch.commit();
+                    }
                   });
 
-                return batch.commit().then(() => {
+                //on last commit if we didn't finish with one
+                if(i%500 !== 499)
+                {
+                  lastBatchCommit = batch.commit();
+                }
+
+                return lastBatchCommit.commit().then(() => {
 
                   let logMessage = "ULQueteurStatsPerYear for UL='"+ul_name+"'("+ul_id+") : "+i+" rows inserted";
                   common.logDebug(logMessage);
