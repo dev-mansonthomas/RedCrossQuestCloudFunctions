@@ -1,4 +1,5 @@
 'use strict';
+import * as _ from "lodash";
 const common              = require('./common');
 const common_firestore    = require('./common_firestore');
 const common_mysql        = require('./common_mysql');
@@ -115,51 +116,28 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
   let mysqlPool = await common_mysql.initMySQL('MYSQL_USER_READ');
 
   //delete current stats of the UL
-  let deleteCollection = function(path)
+  let deleteCollection = async function(path)
   {
     common.logInfo("removing documents on collection '"+path+"' for ul_id="+ul_id);
     // Get a new write batch
 
-
-    return common_firestore.firestore
+    const documents =  await common_firestore.firestore
       .collection(path)
       .where("ul_id", "==", ul_id)
-      .get()
-      .then(
-        querySnapshot => {
-          common.logDebug(`Start of deletion : '${querySnapshot.size}' documents for UL '${ul_id}'`);
-          
-          //batch can't make more than 500 writes, so we commit every 500
-          let i = 0;
-          let batch = null;
-          let lastBatchCommit = null;
-          querySnapshot.forEach(documentSnapshot => {
+      .get();
+    let i = 0;
+    const batches = _.chunk(documents.docs, 500).map( docs =>{
+       const batch =  common_firestore.firestore.batch();
+       common.logDebug("Starting a new batch of deletion at index "+i);
 
-            if(i%500 === 0)
-            {
-              batch = common_firestore.firestore.batch();
-              common.logDebug("Starting a new batch of deletion at index "+i);
-            }
+      docs.forEach(doc =>{
+        batch.delete(doc.ref);
+      });
+      common.logDebug("Committing a batch of deletion at index "+i);
+      return batch.commit();
+    });
 
-            batch.delete(documentSnapshot.ref);
-            i++;
-            if(i%500 === 499)
-            {
-              lastBatchCommit = batch.commit();
-              common.logDebug("Committing a batch of deletion at index "+i);
-            }
-          });
-          //on last commit if we didn't finish with one
-          if(i%500 !== 499)
-          {
-            lastBatchCommit = batch.commit();
-            common.logDebug("Final commit of a batch of deletion at index "+i);
-          }
-
-          common.logDebug("commit of deletion for UL '${ul_id}'");
-          
-          return lastBatchCommit;
-        });
+    return Promise.all(batches);
   };
 
 
@@ -172,7 +150,7 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
         mysqlPool.query(
           queryStr,
           ul_id,
-          (err, results) => {
+          async (err, results) => {
 
             if (err)
             {
@@ -183,38 +161,22 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
             {
               if(Array.isArray(results) && results.length >= 1)
               {
-                let   batch       = null;
                 const collection  = common_firestore.firestore.collection(fsCollectionName);
+
                 let i = 0;
-                let lastBatchCommit = null;
+                const batches = _.chunk(results, 500).map( docs =>{
+                  const batch =  common_firestore.firestore.batch();
+                  common.logDebug("Starting a new batch of insertion at index "+i);
 
-                results.forEach(
-                  (row) =>
-                  {
-                    if(i%500 === 0)
-                    {
-                      batch = common_firestore.firestore.batch();
-                      common.logDebug("Starting a new batch of insertion at index "+i);
-                    }
+                  docs.forEach(doc =>{
                     const docRef = collection.doc();
-                    //otherwise we get this error from firestore : Firestore doesn’t support JavaScript objects with custom prototypes (i.e. objects that were created via the “new” operator)
-                    batch.set(docRef, JSON.parse(JSON.stringify(row)));
-                    i++;
-                    if(i%500 === 499)
-                    {
-                      lastBatchCommit =batch.commit();
-                      common.logDebug("Committing a batch of insertion at index "+i);
-                    }
+                    batch.set(docRef, JSON.parse(JSON.stringify(doc)));
                   });
+                  common.logDebug("Committing a batch of insertion at index "+i);
+                  return batch.commit();
+                });
 
-                //on last commit if we didn't finish with one
-                if(i%500 !== 499)
-                {
-                  lastBatchCommit = batch.commit();
-                  common.logDebug("Final commit of a batch of insertion at index "+i);
-                }
-
-                return lastBatchCommit.commit().then(() => {
+                return Promise.all(batches).then(() => {
 
                   let logMessage = "ULQueteurStatsPerYear for UL='"+ul_name+"'("+ul_id+") : "+i+" rows inserted";
                   common.logDebug(logMessage);
