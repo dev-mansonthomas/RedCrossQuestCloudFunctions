@@ -92,7 +92,7 @@ const queryStr = `
 exports.ULQueteurStatsPerYear = async (event, context) => {
 
   const pubsubMessage = event.data;
-  const parsedObject  = JSON.parse(Buffer.from(pubsubMessage, 'base64').toString());
+  let   parsedObject  = JSON.parse(Buffer.from(pubsubMessage, 'base64').toString());
 
   common.logDebug("ULQueteurStatsPerYear - start processing", parsedObject);
 
@@ -183,7 +183,7 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
                   let logMessage = "ULQueteurStatsPerYear for UL='"+ul_name+"'("+ul_id+") : "+i+" rows inserted";
                   common.logDebug(logMessage);
 
-                  parsedObject.currentIndex = currentIndex++;
+                  parsedObject.currentIndex = currentIndex+1;
                   const newDataBuffer  = Buffer.from(JSON.stringify(parsedObject));
 
                   pubsubClient
