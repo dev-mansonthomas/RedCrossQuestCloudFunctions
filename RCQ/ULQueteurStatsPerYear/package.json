@@ -9,7 +9,7 @@
     "@google-cloud/secret-manager": "^3.1.0",
     "@google-cloud/pubsub": "^2.3.0",
     "google-auth-library": "^6.0.5",
-    "lodash": "^4.17.20"
+    "lodash.chunk": "^4.2.0"
   },
   "license": "GPL-3.0-or-later",
   "repository": {

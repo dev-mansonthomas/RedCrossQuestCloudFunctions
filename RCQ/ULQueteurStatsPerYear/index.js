@@ -1,8 +1,8 @@
 'use strict';
-import * as _ from "lodash";
 const common              = require('./common');
 const common_firestore    = require('./common_firestore');
 const common_mysql        = require('./common_mysql');
+const chunk               = require('lodash.chunk');
 
 const {PubSub}        = require('@google-cloud/pubsub');
 const topicName       = 'ul_update';
@@ -126,7 +126,7 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
       .where("ul_id", "==", ul_id)
       .get();
     let i = 0;
-    const batches = _.chunk(documents.docs, 500).map( docs =>{
+    const batches = chunk(documents.docs, 500).map( docs =>{
        const batch =  common_firestore.firestore.batch();
        common.logDebug("Starting a new batch of deletion at index "+i);
 
@@ -164,7 +164,7 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
                 const collection  = common_firestore.firestore.collection(fsCollectionName);
 
                 let i = 0;
-                const batches = _.chunk(results, 500).map( docs =>{
+                const batches = chunk(results, 500).map( docs =>{
                   const batch =  common_firestore.firestore.batch();
                   common.logDebug("Starting a new batch of insertion at index "+i);
 
