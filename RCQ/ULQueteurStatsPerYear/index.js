@@ -92,6 +92,7 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
 
   const pubsubMessage = event.data;
   const parsedObject  = JSON.parse(Buffer.from(pubsubMessage, 'base64').toString());
+  common.logDebug("ULQueteurStatsPerYear - start processing", parsedObject);
   const uls           = parsedObject.uls;
   let   currentIndex  = parsedObject.currentIndex;
 
@@ -112,7 +113,7 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
   let mysqlPool = await common_mysql.initMySQL('MYSQL_USER_READ');
 
   //delete current stats of the UL
-  let deleteCollection = function(path)
+  let deleteCollection = async function(path)
   {
     common.logInfo("removing documents on collection '"+path+"' for ul_id="+ul_id);
     // Get a new write batch
@@ -134,66 +135,65 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
   };
 
 
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
 
-    deleteCollection(fsCollectionName).then(
-      ()=>
-      {
-        const queryArgs = [ul_id];
-        mysqlPool.query(
-          queryStr,
-          ul_id,
-          (err, results) => {
+    await deleteCollection(fsCollectionName);
 
-            if (err)
-            {
-              common.logError("error while running query ", {queryStr:queryStr, mysqlArgs:queryArgs, exception:err});
-              reject(err);
-            }
-            else
-            {
-              if(Array.isArray(results) && results.length >= 1)
+    const queryArgs = [ul_id];
+    mysqlPool.query(
+      queryStr,
+      ul_id,
+      (err, results) => {
+
+        if (err)
+        {
+          common.logError("error while running query ", {queryStr:queryStr, mysqlArgs:queryArgs, exception:err});
+          reject(err);
+        }
+        else
+        {
+          if(Array.isArray(results) && results.length >= 1)
+          {
+            const batch       = common_firestore.firestore.batch();
+            const collection  = common_firestore.firestore.collection(fsCollectionName);
+            let i = 0;
+            results.forEach(
+              (row) =>
               {
-                const batch       = common_firestore.firestore.batch();
-                const collection  = common_firestore.firestore.collection(fsCollectionName);
-                let i = 0;
-                results.forEach(
-                  (row) =>
-                  {
-                    const docRef = collection.doc();
-                    //otherwise we get this error from firestore : Firestore doesn’t support JavaScript objects with custom prototypes (i.e. objects that were created via the “new” operator)
-                    batch.set(docRef, JSON.parse(JSON.stringify(row)));
-                    i++;
-                  });
+                const docRef = collection.doc();
+                //otherwise we get this error from firestore : Firestore doesn’t support JavaScript objects with custom prototypes (i.e. objects that were created via the “new” operator)
+                batch.set(docRef, JSON.parse(JSON.stringify(row)));
+                i++;
+              });
 
-                return batch.commit().then(() => {
+            return batch.commit().then(() => {
 
-                  let logMessage = "ULQueteurStatsPerYear for UL='"+ul_name+"'("+ul_id+") : "+i+" rows inserted";
-                  common.logDebug(logMessage);
+              let logMessage = "ULQueteurStatsPerYear for UL='"+ul_name+"'("+ul_id+") : "+i+" rows inserted";
+              common.logDebug(logMessage);
 
-                  parsedObject.currentIndex = currentIndex++;
-                  const newDataBuffer  = Buffer.from(JSON.stringify(parsedObject));  
+              parsedObject.currentIndex = currentIndex++;
+              const newDataBuffer  = Buffer.from(JSON.stringify(parsedObject));
 
-                  pubsubClient
-                    .topic     (topicName)
-                    .publish   (newDataBuffer)
-                    .then      ((dataResult)=>{
-                      common.logDebug("Published 1 message to process next UL on topic '"+topicName+"' "+JSON.stringify(dataResult), parsedObject);
-                      resolve(logMessage);
-                    })
-                    .catch(err=>{
-                      common.handleFirestoreError(err);
-                    });
+              pubsubClient
+                .topic     (topicName)
+                .publish   (newDataBuffer)
+                .then      ((dataResult)=>{
+                  common.logDebug("Published 1 message to process next UL on topic '"+topicName+"' "+JSON.stringify(dataResult), parsedObject);
+                  resolve(logMessage);
+                })
+                .catch(err=>{
+                  common.handleFirestoreError(err);
                 });
-              }
-              else
-              {
-                let logMessage = "query for UL '"+ul_id+"' returned no row "+queryStr+" results : "+JSON.stringify(results);
-                common.logInfo(logMessage);
-                resolve(logMessage);
-              }
-            }
-          });
+            });
+          }
+          else
+          {
+            let logMessage = "query for UL '"+ul_id+"' returned no row "+queryStr+" results : "+JSON.stringify(results);
+            common.logInfo(logMessage);
+            resolve(logMessage);
+          }
+        }
       });
+
   });
 };
