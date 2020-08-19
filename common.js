@@ -117,7 +117,7 @@ async function logWarn(message, extraData)
 }
 
 
-async function logDebug(severity, message, extraData)
+async function logDebug(message, extraData)
 {
   const logData = {
     data: extraData,
@@ -135,7 +135,7 @@ async function logDebug(severity, message, extraData)
   }
 }
 
-async function logInfo(severity, message, extraData)
+async function logInfo( message, extraData)
 {
   const logData = {
     data: extraData,
