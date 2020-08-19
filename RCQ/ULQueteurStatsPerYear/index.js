@@ -132,27 +132,33 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
           //batch can't make more than 500 writes, so we commit every 500
           let i = 0;
           let batch = null;
+          let lastBatchCommit = null;
           querySnapshot.forEach(documentSnapshot => {
 
             if(i%500 === 0)
             {
-              common_firestore.firestore.batch();
+              batch = common_firestore.firestore.batch();
+              common.logDebug("Starting a new batch of deletion at index "+i);
             }
 
             batch.delete(documentSnapshot.ref);
             i++;
             if(i%500 === 499)
             {
-              batch.commit();
+              lastBatchCommit = batch.commit();
+              common.logDebug("Committing a batch of deletion at index "+i);
             }
           });
           //on last commit if we didn't finish with one
           if(i%500 !== 499)
           {
-            batch.commit();
+            lastBatchCommit = batch.commit();
+            common.logDebug("Final commit of a batch of deletion at index "+i);
           }
 
           common.logDebug("commit of deletion for UL '${ul_id}'");
+          
+          return lastBatchCommit;
         });
   };
 
@@ -187,7 +193,8 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
                   {
                     if(i%500 === 0)
                     {
-                      common_firestore.firestore.batch();
+                      batch = common_firestore.firestore.batch();
+                      common.logDebug("Starting a new batch of insertion at index "+i);
                     }
                     const docRef = collection.doc();
                     //otherwise we get this error from firestore : Firestore doesn’t support JavaScript objects with custom prototypes (i.e. objects that were created via the “new” operator)
@@ -196,6 +203,7 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
                     if(i%500 === 499)
                     {
                       lastBatchCommit =batch.commit();
+                      common.logDebug("Committing a batch of insertion at index "+i);
                     }
                   });
 
@@ -203,6 +211,7 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
                 if(i%500 !== 499)
                 {
                   lastBatchCommit = batch.commit();
+                  common.logDebug("Final commit of a batch of insertion at index "+i);
                 }
 
                 return lastBatchCommit.commit().then(() => {
