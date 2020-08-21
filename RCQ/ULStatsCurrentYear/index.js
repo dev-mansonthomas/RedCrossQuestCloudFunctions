@@ -2,6 +2,7 @@
 const common              = require('./common');
 const common_firestore    = require('./common_firestore');
 const common_mysql        = require('./common_mysql');
+const common_pubsub       = require('./common_pubsub');
 const chunk               = require('lodash.chunk');
 
 const {PubSub}        = require('@google-cloud/pubsub');
@@ -176,30 +177,23 @@ exports.ULStatsCurrentYear = async (event, context) => {
                   return batch.commit();
                 });
 
-                return Promise.all(batches).then(() => {
+                return Promise.all(batches).then(async () => {
 
                   let logMessage = "ULStatsCurrentYear for UL='"+ul_name+"'("+ul_id+") : "+i+" rows inserted";
                   common.logDebug(logMessage);
-
                   parsedObject.currentIndex = currentIndex+1;
-                  const newDataBuffer  = Buffer.from(JSON.stringify(parsedObject));
-
-                  pubsubClient
-                    .topic     (topicName)
-                    .publish   (newDataBuffer)
-                    .then      ((dataResult)=>{
-                      common.logDebug("ULStatsCurrentYear - Published 1 message to process next UL on topic '"+topicName+"' "+JSON.stringify(dataResult), parsedObject);
-                      resolve(logMessage);
-                    })
-                    .catch(err=>{
-                      common.handleFirestoreError(err);
-                    });
+                  await common_pubsub.publishMessage(topicName, parsedObject)
+                  resolve(logMessage);
                 });
               }
               else
               {
                 let logMessage = "ULStatsCurrentYear - query for UL '"+ul_id+"' returned no row "+queryStr+" results : "+JSON.stringify(results);
                 common.logInfo(logMessage);
+                
+                parsedObject.currentIndex = currentIndex+1;
+                await common_pubsub.publishMessage(topicName, parsedObject)
+
                 resolve(logMessage);
               }
             }
