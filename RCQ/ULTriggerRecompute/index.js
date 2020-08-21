@@ -44,7 +44,7 @@ exports.ULTriggerRecompute = async (event, context) => {
         {
           await common_pubsub.publishMessage(topicName, {currentIndex:0, uls:results})
 
-          common.logDebug("Published 1 message on topic '"+topicName+"'", {dataResult:dataResult, data:data});
+          common.logDebug("Published 1 message on topic '"+topicName+"'", {data:data});
           resolve("ULTriggerRecompute done with "+results.length+" UL");
         }
         else
