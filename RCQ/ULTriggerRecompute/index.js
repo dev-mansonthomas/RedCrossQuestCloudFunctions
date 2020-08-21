@@ -1,10 +1,9 @@
 'use strict';
 const common        = require('./common');
 const common_mysql  = require('./common_mysql');
+const common_pubsub = require('./common_pubsub');
 
-const {PubSub}        = require('@google-cloud/pubsub');
 const topicName       = 'ul_update';
-const pubsubClient    = new PubSub();
 
 const queryStr = `
 SELECT u.id, u.name, u.phone, u.latitude, u.longitude, u.address, u.postal_code, u.city, u.external_id, u.email, 
@@ -29,9 +28,9 @@ exports.ULTriggerRecompute = async (event, context) => {
   // which helps keep your GCF instances under SQL connection limits.
   let mysqlPool = await common_mysql.initMySQL('MYSQL_USER_READ');
 
-  return new Promise((resolve, reject) => {
+  return new Promise( (resolve, reject) => {
     mysqlPool.query(queryStr, [],
-    (err, results) => {
+      async (err, results) => {
       if (err)
       {
         common.logError("error while running query ", {queryStr:queryStr, mysqlArgs:[], exception:err});
@@ -43,20 +42,10 @@ exports.ULTriggerRecompute = async (event, context) => {
         //console.error(logMessage);
         if(results !== undefined && Array.isArray(results) && results.length >= 1)
         {
-          const data        = {currentIndex:0, uls:results};
-          const dataBuffer  = Buffer.from(JSON.stringify(data));
+          await common_pubsub.publishMessage(topicName, {currentIndex:0, uls:results})
 
-          pubsubClient
-            .topic     (topicName)
-            .publish   (dataBuffer)
-            .then      ((dataResult)=>{
-              common.logDebug("Published 1 message on topic '"+topicName+"'", {dataResult:dataResult, data:data});
-              resolve("ULTriggerRecompute done with "+results.length+" UL");
-            })
-            .catch(err=>{
-              common.handleFirestoreError
-            });
-
+          common.logDebug("Published 1 message on topic '"+topicName+"'", {dataResult:dataResult, data:data});
+          resolve("ULTriggerRecompute done with "+results.length+" UL");
         }
         else
         {

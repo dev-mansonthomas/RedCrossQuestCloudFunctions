@@ -5,10 +5,7 @@ const common_mysql        = require('./common_mysql');
 const common_pubsub       = require('./common_pubsub');
 const chunk               = require('lodash.chunk');
 
-const {PubSub}        = require('@google-cloud/pubsub');
 const topicName       = 'ul_update';
-const pubsubClient    = new PubSub();
-
 const fsCollectionName = 'ul_stats_current_year';
 
 const queryStr = `
