@@ -101,8 +101,8 @@ exports.ULStatsCurrentYear = async (event, context) => {
     return;
   }
   if(currentIndex >= uls.length )
-  {
-    common.logError("ULStatsCurrentYear - currentIndex is greater than array size", uls);
+  {//that's when we finish looping the collection of UL
+    common.logDebug("ULStatsCurrentYear - currentIndex is greater than array size", uls);
     return;
   }
 
@@ -176,22 +176,28 @@ exports.ULStatsCurrentYear = async (event, context) => {
 
                 return Promise.all(batches).then(async () => {
 
-                  let logMessage = "ULStatsCurrentYear for UL='"+ul_name+"'("+ul_id+") : "+i+" rows inserted";
-                  common.logDebug(logMessage);
-                  parsedObject.currentIndex = currentIndex+1;
-                  await common_pubsub.publishMessage(topicName, parsedObject)
-                  resolve(logMessage);
+                  setTimeout(async function(){
+                    let logMessage = "ULStatsCurrentYear for UL='"+ul_name+"'("+ul_id+") : "+i+" rows inserted";
+                    common.logDebug(logMessage);
+                    parsedObject.currentIndex = currentIndex+1;
+                    await common_pubsub.publishMessage(topicName, parsedObject)
+                    resolve(logMessage);
+                  }, 400);
+
+
                 });
               }
               else
               {
-                let logMessage = "ULStatsCurrentYear - query for UL '"+ul_id+"' returned no row "+queryStr+" results : "+JSON.stringify(results);
-                common.logInfo(logMessage);
-                
-                parsedObject.currentIndex = currentIndex+1;
-                await common_pubsub.publishMessage(topicName, parsedObject)
+                setTimeout(async function(){
+                  let logMessage = "ULStatsCurrentYear - query for UL '"+ul_id+"' returned no row "+queryStr+" results : "+JSON.stringify(results);
+                  common.logInfo(logMessage);
 
-                resolve(logMessage);
+                  parsedObject.currentIndex = currentIndex+1;
+                  await common_pubsub.publishMessage(topicName, parsedObject)
+
+                  resolve(logMessage);
+                }, 400);
               }
             }
           });
