@@ -2,6 +2,7 @@
 const common              = require('./common');
 const common_firestore    = require('./common_firestore');
 const common_mysql        = require('./common_mysql');
+const common_pubsub       = require('./common_pubsub');
 const chunk               = require('lodash.chunk');
 
 const {PubSub}        = require('@google-cloud/pubsub');
@@ -78,8 +79,11 @@ const queryStr = `
 
 /***
  * Cloud Scheduler "trigger_ul_update" publish an empty message on "trigger_ul_update"
- * ULTriggerRecompute Cloud Function is listening, on reception it will trigger stats recompute every 400ms
- * which call this cloud function.
+ * ULTriggerRecompute Cloud Function is listening, on reception it will query the list of active UL
+ * and post a message with this list and an index set to 0
+ *
+ * This cloud function receive the message via 'ul_update' topic, make the computation and store it in Firestore,
+ * and then republish the same message with the index incremented
  *
  * Requires :
  * roles/cloudsql.client (ou roles/cloudsql.viewer)
@@ -101,12 +105,12 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
 
   if(!Array.isArray(uls))
   {
-    common.logError("uls is not an array", uls);
+    common.logError("ULQueteurStatsPerYear - uls is not an array", uls);
     return;
   }
   if(currentIndex >= uls.length )
   {
-    common.logError("currentIndex is greater than array size", uls);
+    common.logError("ULQueteurStatsPerYear - currentIndex is greater than array size", uls);
     return;
   }
 
@@ -118,7 +122,7 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
   //delete current stats of the UL
   let deleteCollection = async function(path)
   {
-    common.logInfo("removing documents on collection '"+path+"' for ul_id="+ul_id);
+    common.logInfo("ULQueteurStatsPerYear - removing documents on collection '"+path+"' for ul_id="+ul_id);
     // Get a new write batch
 
     const documents =  await common_firestore.firestore
@@ -128,13 +132,13 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
     let i = 0;
     const batches = chunk(documents.docs, 500).map( docs =>{
        const batch =  common_firestore.firestore.batch();
-       common.logDebug("Starting a new batch of deletion at index "+i);
+       common.logDebug("ULQueteurStatsPerYear - Starting a new batch of deletion at index "+i);
 
       docs.forEach(doc =>{
         batch.delete(doc.ref);
         i++;
       });
-      common.logDebug("Committing a batch of deletion at index "+i);
+      common.logDebug("ULQueteurStatsPerYear - Committing a batch of deletion at index "+i);
       return batch.commit();
     });
 
@@ -155,7 +159,7 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
 
             if (err)
             {
-              common.logError("error while running query ", {queryStr:queryStr, mysqlArgs:queryArgs, exception:err});
+              common.logError("ULQueteurStatsPerYear - error while running query ", {queryStr:queryStr, mysqlArgs:queryArgs, exception:err});
               reject(err);
             }
             else
@@ -167,41 +171,35 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
                 let i = 0;
                 const batches = chunk(results, 500).map( docs =>{
                   const batch =  common_firestore.firestore.batch();
-                  common.logDebug("Starting a new batch of insertion at index "+i);
+                  common.logDebug("ULQueteurStatsPerYear - Starting a new batch of insertion at index "+i);
 
                   docs.forEach(doc =>{
                     const docRef = collection.doc();
                     batch.set(docRef, JSON.parse(JSON.stringify(doc)));
                     i++;
                   });
-                  common.logDebug("Committing a batch of insertion at index "+i);
+                  common.logDebug("ULQueteurStatsPerYear - Committing a batch of insertion at index "+i);
                   return batch.commit();
                 });
 
-                return Promise.all(batches).then(() => {
+                return Promise.all(batches).then( async() => {
 
                   let logMessage = "ULQueteurStatsPerYear for UL='"+ul_name+"'("+ul_id+") : "+i+" rows inserted";
                   common.logDebug(logMessage);
 
                   parsedObject.currentIndex = currentIndex+1;
-                  const newDataBuffer  = Buffer.from(JSON.stringify(parsedObject));
+                  await common_pubsub.publishMessage(topicName, parsedObject)
+                  resolve(logMessage);
 
-                  pubsubClient
-                    .topic     (topicName)
-                    .publish   (newDataBuffer)
-                    .then      ((dataResult)=>{
-                      common.logDebug("Published 1 message to process next UL on topic '"+topicName+"' "+JSON.stringify(dataResult), parsedObject);
-                      resolve(logMessage);
-                    })
-                    .catch(err=>{
-                      common.handleFirestoreError(err);
-                    });
+
                 });
               }
               else
               {
-                let logMessage = "query for UL '"+ul_id+"' returned no row "+queryStr+" results : "+JSON.stringify(results);
+                let logMessage = "ULQueteurStatsPerYear - query for UL '"+ul_id+"' returned no row "+queryStr+" results : "+JSON.stringify(results);
                 common.logInfo(logMessage);
+                parsedObject.currentIndex = currentIndex+1;
+                await common_pubsub.publishMessage(topicName, parsedObject)
                 resolve(logMessage);
               }
             }
