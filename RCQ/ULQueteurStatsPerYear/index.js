@@ -183,9 +183,12 @@ exports.ULQueteurStatsPerYear = async (event, context) => {
                 });
 
                 return Promise.all(batches).then( async() => {
+                  let logMessage = "ULQueteurStatsPerYear for UL='"+ul_name+"'("+ul_id+") : "+i+" rows inserted";
+                  common.logDebug("About to wait 400ms "+logMessage);
+
                   setTimeout(async function(){
-                    let logMessage = "ULQueteurStatsPerYear for UL='"+ul_name+"'("+ul_id+") : "+i+" rows inserted";
-                    common.logDebug(logMessage);
+
+                    common.logDebug("After waiting 400ms "+logMessage);
 
                     parsedObject.currentIndex = currentIndex+1;
                     await common_pubsub.publishMessage(topicName, parsedObject)
