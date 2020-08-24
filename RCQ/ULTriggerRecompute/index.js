@@ -42,9 +42,9 @@ exports.ULTriggerRecompute = async (event, context) => {
         //console.error(logMessage);
         if(results !== undefined && Array.isArray(results) && results.length >= 1)
         {
-          await common_pubsub.publishMessage(topicName, {currentIndex:0, uls:results})
+          const dataResponse = await common_pubsub.publishMessage(topicName, {currentIndex:0, uls:results})
 
-          common.logDebug("Published 1 message on topic '"+topicName+"'", {data:data});
+          common.logDebug("Published 1 message on topic '"+topicName+"'", {data:dataResponse});
           resolve("ULTriggerRecompute done with "+results.length+" UL");
         }
         else
