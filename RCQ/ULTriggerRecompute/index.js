@@ -1,7 +1,7 @@
 'use strict';
-const common        = require('./common');
-const common_mysql  = require('./common_mysql');
-const common_pubsub = require('./common_pubsub');
+const common            = require('./common');
+const common_mysql      = require('./common_mysql');
+const common_cloudTask  = require('./common_cloudTasks');
 
 const topicName       = 'ul_update';
 
@@ -12,6 +12,14 @@ FROM   ul u
 WHERE  u.date_demarrage_rcq is not null
 ORDER BY date_demarrage_rcq
 `;
+
+let projectName     = common.getProjectName();
+let serviceAccount  = "cf-computeulstats@"+projectName+".iam.gserviceaccount.com";
+let url             = "https://europe-west1-"+projectName+".cloudfunctions.net/ComputeULStats";
+//format:
+//SA : cf-ztestCrossProjectFirestoCx@rcq-fr-dev.iam.gserviceaccount.com
+//URL: https://europe-west1-rcq-fr-dev.cloudfunctions.net/ztestCrossProjectFirestoCx
+
 
 /**
  * Cloud Scheduler "trigger_ul_update" publish an empty message on "trigger_ul_update"
@@ -42,10 +50,11 @@ exports.ULTriggerRecompute = async (event, context) => {
         //console.error(logMessage);
         if(results !== undefined && Array.isArray(results) && results.length >= 1)
         {
-          const dataResponse = await common_pubsub.publishMessage(topicName, {currentIndex:0, uls:results})
-
-          common.logDebug("Published 1 message on topic '"+topicName+"'", {data:dataResponse});
-          resolve("ULTriggerRecompute done with "+results.length+" UL");
+          results.foreach(value=>{
+            common_cloudTask.createTask(url, serviceAccount, value);
+          });
+          common.logDebug("ULTriggerRecompute - creating "+results.length+" tasks ", {url:url, serviceAccount:serviceAccount, results:results});
+          resolve("ULTriggerRecompute - creating "+results.length+" tasks ");
         }
         else
         {
