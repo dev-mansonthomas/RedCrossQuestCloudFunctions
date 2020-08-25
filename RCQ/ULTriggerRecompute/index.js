@@ -51,8 +51,15 @@ exports.ULTriggerRecompute = async (event, context) => {
         if(results !== undefined && Array.isArray(results) && results.length >= 1)
         {
           results.foreach(value=>{
+            value.computeType='queteurStats';
             common_cloudTask.createTask(url, serviceAccount, value);
           });
+
+          results.foreach(value=>{
+            value.computeType='ULStats';
+            common_cloudTask.createTask(url, serviceAccount, value);
+          });
+
           common.logDebug("ULTriggerRecompute - creating "+results.length+" tasks ", {url:url, serviceAccount:serviceAccount, results:results});
           resolve("ULTriggerRecompute - creating "+results.length+" tasks ");
         }
