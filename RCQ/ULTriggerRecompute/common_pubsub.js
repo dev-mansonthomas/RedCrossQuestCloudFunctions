@@ -6,7 +6,7 @@ async function publishMessage(topicName, data)
 {
   const dataBuffer  = Buffer.from(JSON.stringify(data));
 
-  await pubsubClient
+  return await pubsubClient
     .topic     (topicName)
     .publish   (dataBuffer);
 }

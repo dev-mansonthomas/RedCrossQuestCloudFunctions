@@ -36,6 +36,10 @@ async function getSecret(secretName){
   return accessResponse.payload.data.toString('utf8');
 }
 
+function getProjectName()
+{
+  return (project+"-"+country+"-"+env).toLowerCase();
+}
 function setCors(request, response)
 {
   response.set('Access-Control-Allow-Origin', "*");
@@ -52,14 +56,14 @@ function setCors(request, response)
 }
 
 const METADATA = {
-  resource: {
-    type: 'cloud_function',
-    labels: {
-      function_name: functionName,
-      region: 'europe-west1'
+    resource: {
+      type: 'cloud_function',
+      labels: {
+        function_name: functionName,
+        region: 'europe-west1'
+      }
     }
   }
-}
 ;
 
 async function logCritical(message, extraData)
@@ -87,7 +91,7 @@ async function logError(message, extraData)
     severity: 'error',
     message: message
   };
-  
+
   try
   {
     return logger.error(logger.entry(METADATA, logData));
@@ -166,11 +170,12 @@ function handleFirestoreError(err){
 }
 
 module.exports = {
-  getSecret   : getSecret,
-  setCors     : setCors  ,
-  logError    : logError,
-  logWarn     : logWarn,
-  logInfo     : logInfo,
-  logDebug    : logDebug,
+  getProjectName : getProjectName,
+  getSecret      : getSecret,
+  setCors        : setCors  ,
+  logError       : logError,
+  logWarn        : logWarn,
+  logInfo        : logInfo,
+  logDebug       : logDebug,
   handleFirestoreError:handleFirestoreError
 };
