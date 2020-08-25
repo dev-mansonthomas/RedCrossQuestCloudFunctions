@@ -48,7 +48,7 @@ exports.ULTriggerRecompute = async (event, context) => {
       else
       {
 
-        common.logDebug("query Results", results);
+        await common.logDebug("query Results", results);
         //let logMessage = "Start processing UL array of size :"+results.length;
         //console.error(logMessage);
         if(results !== undefined && Array.isArray(results) && results.length >= 1)
