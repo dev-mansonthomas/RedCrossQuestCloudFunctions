@@ -54,17 +54,19 @@ exports.ULTriggerRecompute = async (event, context) => {
         if(results !== undefined && Array.isArray(results) && results.length >= 1)
         {
           // tasks for Queteur Stats
-          results.foreach(value=>{
-            value.computeType='queteurStats';
-            common_cloudTask.createTask(url, serviceAccount, value);
-          });
+          for(let i=0;i<results.length;i++)
+          {
+            results[i].computeType='queteurStats';
+            common_cloudTask.createTask(url, serviceAccount, results[i]);
+          }
           // tasks for UL stats
-          results.foreach(value=>{
-            value.computeType='ULStats';
-            common_cloudTask.createTask(url, serviceAccount, value);
-          });
+          for(let i=0;i<results.length;i++)
+          {
+            results[i].computeType='ULStats';
+            common_cloudTask.createTask(url, serviceAccount, results[i]);
+          }
 
-          common.logDebug("ULTriggerRecompute - creating "+results.length+" tasks ", {url:url, serviceAccount:serviceAccount, results:results});
+          common.logDebug("ULTriggerRecompute - creating 2x"+results.length+" tasks ", {url:url, serviceAccount:serviceAccount, results:results});
           resolve("ULTriggerRecompute - creating "+results.length+" tasks ");
         }
         else
