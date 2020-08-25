@@ -18,7 +18,7 @@ let serviceAccount  = "cf-computeulstats@"+projectName+".iam.gserviceaccount.com
 let url             = "https://europe-west1-"+projectName+".cloudfunctions.net/ComputeULStats";
 //format:
 //SA : cf-ztestCrossProjectFirestoCx@rcq-fr-dev.iam.gserviceaccount.com
-//URL: https://europe-west1-rcq-fr-dev.cloudfunctions.net/ztestCrossProjectFirestoCx
+//URL: https://europe-west1-rcq-fr-dev.cloudfunctions.net/ComputeULStats
 
 
 /**
@@ -28,8 +28,7 @@ let url             = "https://europe-west1-"+projectName+".cloudfunctions.net/C
  * roles :  roles/cloudsql.client;roles/secretmanager.secretAccessor;roles/pubsub.publisher;roles/pubsub.subscriber
  **/
 exports.ULTriggerRecompute = async (event, context) => {
-
-
+  
   common.logDebug("ULTriggerRecompute - start of processing");
   // Initialize the pool lazily, in case SQL access isn't needed for this
   // GCF instance. Doing so minimizes the number of active SQL connections,

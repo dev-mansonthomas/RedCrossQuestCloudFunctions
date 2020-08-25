@@ -18,124 +18,27 @@ const common              = require('./common');
  *
  * */
 exports.ComputeULStats = async (request, response) => {
+  const task = request.body;
 
-  const pubsubMessage = request.data;
-  let   parsedObject  = JSON.parse(Buffer.from(pubsubMessage, 'base64').toString());
-
-  common.logDebug("ULStatsCurrentYear - start processing", parsedObject);
-
-  const uls           = parsedObject.uls;
-  let   currentIndex  = parsedObject.currentIndex;
-
-  if(!Array.isArray(uls))
+  if(task.computeType === 'queteurStats')
   {
-    common.logError("ULStatsCurrentYear - uls is not an array", uls);
-    return;
+    await common.logDebug("ULQueteurStatsPerYear - start", task);
+    const ULQueteurStatsPerYear              = require('./ULQueteurStatsPerYear.js');
+    await ULQueteurStatsPerYear.compute();
+    response.status(200).send('ULQueteurStatsPerYear Done');
+
   }
-  if(currentIndex >= uls.length )
-  {//that's when we finish looping the collection of UL
-    common.logDebug("ULStatsCurrentYear - currentIndex is greater than array size", uls);
-    return;
-  }
-
-  const ul_id         = uls[currentIndex].id;
-  const ul_name       = uls[currentIndex].name;
-
-  let mysqlPool = await common_mysql.initMySQL('MYSQL_USER_READ');
-
-  //delete current stats of the UL
-  let deleteCollection = async function(path)
+  else if(task.computeType === 'queteurStats')
   {
-    common.logInfo("ULStatsCurrentYear - removing documents on collection '"+path+"' for ul_id="+ul_id);
-    // Get a new write batch
+    await common.logDebug("ULStatsCurrentYear - start", task);
+    const ULStatsCurrentYear              = require('./ULStatsCurrentYear.js');
+    await ULStatsCurrentYear.compute();
+    response.status(200).send('ULStatsCurrentYear Done');
+  }
+  else
+  {
+    await common.logDebug("Wrong value for computeType", task);
+    response.status(400).send('Wrong value for computeType');
+  }
 
-    const documents =  await common_firestore.firestore
-      .collection(path)
-      .where("ul_id", "==", ul_id)
-      .get();
-    let i = 0;
-    const batches = chunk(documents.docs, 500).map( docs =>{
-       const batch =  common_firestore.firestore.batch();
-       common.logDebug("ULStatsCurrentYear - Starting a new batch of deletion at index "+i);
-
-      docs.forEach(doc =>{
-        batch.delete(doc.ref);
-        i++;
-      });
-      common.logDebug("ULStatsCurrentYear - Committing a batch of deletion at index "+i);
-      return batch.commit();
-    });
-
-    return Promise.all(batches);
-  };
-
-
-  return new Promise((resolve, reject) => {
-
-    deleteCollection(fsCollectionName).then(
-      ()=>
-      {
-        const queryArgs = [ul_id];
-        mysqlPool.query(
-          queryStr,
-          ul_id,
-          async (err, results) => {
-
-            if (err)
-            {
-              common.logError("ULStatsCurrentYear - error while running query ", {queryStr:queryStr, mysqlArgs:queryArgs, exception:err});
-              reject(err);
-            }
-            else
-            {
-              if(Array.isArray(results) && results.length >= 1)
-              {
-                const collection  = common_firestore.firestore.collection(fsCollectionName);
-
-                let i = 0;
-                const batches = chunk(results, 500).map( docs =>{
-                  const batch =  common_firestore.firestore.batch();
-                  common.logDebug("ULStatsCurrentYear - Starting a new batch of insertion at index "+i);
-
-                  docs.forEach(doc =>{
-                    const docRef = collection.doc();
-                    batch.set(docRef, JSON.parse(JSON.stringify(doc)));
-                    i++;
-                  });
-                  common.logDebug("ULStatsCurrentYear - Committing a batch of insertion at index "+i);
-                  return batch.commit();
-                });
-
-                return Promise.all(batches).then(async () => {
-
-                  let logMessage = "ULStatsCurrentYear for UL='"+ul_name+"'("+ul_id+") : "+i+" rows inserted";
-                  common.logDebug("About to wait 400ms "+logMessage);
-                  setTimeout(async function(){
-
-                    common.logDebug("After waiting 400ms "+logMessage);
-                    parsedObject.currentIndex = currentIndex+1;
-                    const responseData = await common_pubsub.publishMessage(topicName, parsedObject);
-                    common.logDebug("After waiting 400ms "+logMessage+". Publishing on topic "+topicName, {parsedObject:parsedObject, responseData:responseData});
-                    resolve(logMessage);
-                  }, 400);
-
-
-                });
-              }
-              else
-              {
-                setTimeout(async function(){
-                  let logMessage = "ULStatsCurrentYear - query for UL '"+ul_id+"' returned no row "+queryStr+" results : "+JSON.stringify(results);
-                  common.logInfo(logMessage);
-
-                  parsedObject.currentIndex = currentIndex+1;
-                  await common_pubsub.publishMessage(topicName, parsedObject)
-
-                  resolve(logMessage);
-                }, 400);
-              }
-            }
-          });
-      });
-  });
 };
