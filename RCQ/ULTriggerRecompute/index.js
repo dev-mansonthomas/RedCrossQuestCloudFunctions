@@ -37,6 +37,7 @@ exports.ULTriggerRecompute = async (event, context) => {
   let mysqlPool = await common_mysql.initMySQL('MYSQL_USER_READ');
 
   return new Promise( (resolve, reject) => {
+    
     mysqlPool.query(queryStr, [],
       async (err, results) => {
       if (err)
