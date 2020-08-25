@@ -19,7 +19,7 @@ const common              = require('./common');
  * */
 exports.ComputeULStats = async (request, response) => {
 
-  const pubsubMessage = event.data;
+  const pubsubMessage = request.data;
   let   parsedObject  = JSON.parse(Buffer.from(pubsubMessage, 'base64').toString());
 
   common.logDebug("ULStatsCurrentYear - start processing", parsedObject);

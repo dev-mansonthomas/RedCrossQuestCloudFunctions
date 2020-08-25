@@ -1,6 +1,12 @@
 'use strict';
+const common            = require('./common');
 const {v2beta3}        = require('@google-cloud/tasks');
 const cloudTasksClient    = new v2beta3.CloudTasksClient();
+
+let projectName = common.getProjectName();
+let location    = "europe-west1";
+let queue       = "compute-stats-on-mysql";
+const parent    = cloudTasksClient.queuePath(projectName, location, queue);
 
 async function createTask(url, serviceAccount, data)
 {
