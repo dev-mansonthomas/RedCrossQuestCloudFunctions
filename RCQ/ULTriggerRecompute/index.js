@@ -46,15 +46,18 @@ exports.ULTriggerRecompute = async (event, context) => {
       }
       else
       {
+
+        common.logDebug("query Results", results);
         //let logMessage = "Start processing UL array of size :"+results.length;
         //console.error(logMessage);
         if(results !== undefined && Array.isArray(results) && results.length >= 1)
         {
+          // tasks for Queteur Stats
           results.foreach(value=>{
             value.computeType='queteurStats';
             common_cloudTask.createTask(url, serviceAccount, value);
           });
-
+          // tasks for UL stats
           results.foreach(value=>{
             value.computeType='ULStats';
             common_cloudTask.createTask(url, serviceAccount, value);
