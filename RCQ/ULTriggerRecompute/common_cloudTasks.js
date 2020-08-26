@@ -1,7 +1,7 @@
 'use strict';
 const common            = require('./common');
-const {v2beta3}        = require('@google-cloud/tasks');
-const cloudTasksClient    = new v2beta3.CloudTasksClient();
+const {v2beta3}         = require('@google-cloud/tasks');
+const cloudTasksClient  = new v2beta3.CloudTasksClient();
 
 let projectName = common.getProjectName();
 let location    = "europe-west3";
@@ -31,7 +31,7 @@ async function createTask(url, serviceAccount, data)
   {
     // Send create task request.
     const [response] = await cloudTasksClient.createTask({parent, task});
-    console.log(`Created task ${response.name}`);
+    common.logDebug(`Created task ${response.name}`, {parent:parent,task:task, response:response});
     return response;
   }
   catch (error)
