@@ -14,14 +14,14 @@ async function createTask(url, serviceAccount, data)
   const task = {
     httpRequest: {
       httpMethod: 'POST',
-      url,
+      url:url,
       oidcToken: {
         serviceAccountEmail: serviceAccount,
       },
       headers: {
         'Content-Type': 'application/json',
       },
-      dataBuffer,
+      body:dataBuffer,
     },
   };
 
