@@ -22,7 +22,7 @@ async function createTask(url, serviceAccount, data)
       headers: {
         'Content-Type': 'application/json',
       },
-      dataBuffer,
+      body:dataBuffer,
     },
   };
 
@@ -31,7 +31,7 @@ async function createTask(url, serviceAccount, data)
   {
     // Send create task request.
     const [response] = await cloudTasksClient.createTask({parent, task});
-    common.logDebug(`Created task ${response.name}`, {parent:parent,task:task, response:response});
+    common.logDebug(`Created task ${response.name}`, {parent:parent,task:task, response:response, data:data});
     return response;
   }
   catch (error)
