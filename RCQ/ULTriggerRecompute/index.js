@@ -56,12 +56,15 @@ exports.ULTriggerRecompute = async (event, context) => {
           for(let i=0;i<results.length;i++)
           {
             results[i].computeType='queteurStats';
+
+            common.logDebug("data for queteurStats tasks "+i,results[i]);
             await common_cloudTask.createTask(url, serviceAccount, results[i]);
           }
           // tasks for UL stats
           for(let i=0;i<results.length;i++)
           {
             results[i].computeType='ULStats';
+            common.logDebug("data for ULStats tasks "+i,results[i]);
             await common_cloudTask.createTask(url, serviceAccount, results[i]);
           }
 
