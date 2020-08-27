@@ -20,6 +20,7 @@ const common              = require('./common');
 exports.ComputeULStats = async (request, response) => {
 
   await common.logDebug("ComputeULStats - start", JSON.stringify(request.body));
+  response.status(200).send('ComputeULStats -  Done');
 /*
   const task = request.body;
 
