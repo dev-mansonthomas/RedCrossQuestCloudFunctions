@@ -10,18 +10,18 @@ const parent    = cloudTasksClient.queuePath(projectName, location, queue);
 
 async function createTask(url, serviceAccount, data)
 {
-  const dataBuffer  = "";//Buffer.from(JSON.stringify({test:'coucou'})).toString('base64');
+  const body  = Buffer.from(JSON.stringify(data)).toString('base64');
   const task = {
     httpRequest: {
       httpMethod: 'POST',
-      url:url,
+      url,
       oidcToken: {
         serviceAccountEmail: serviceAccount,
       },
       headers: {
         'Content-Type': 'application/json',
       },
-      body:dataBuffer,
+      body,
     },
   };
 
