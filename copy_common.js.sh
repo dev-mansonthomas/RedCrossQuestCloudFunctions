@@ -9,8 +9,8 @@ function copyCommon
   for dir in "${TARGET_FOLDER}"/*
   do
     cd "${dir}" || exit 1
-    rm common.js common_firestore.js common_firebase.js common_mysql.js common_pubsub.js
-    cp ../../common.js ../../common_firestore.js ../../common_firebase.js ../../common_mysql.js ../../common_pubsub.js .
+    rm common.js common_firestore.js common_firebase.js common_mysql.js common_pubsub.js common_cloudTasks.js
+    cp ../../common.js ../../common_firestore.js ../../common_firebase.js ../../common_mysql.js ../../common_pubsub.js  ../../common_cloudTasks.js .
     cd -  || exit 1
 
   done
