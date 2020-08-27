@@ -21,7 +21,7 @@ async function createTask(url, serviceAccount, data)
       headers: {
         'Content-Type': 'application/json',
       },
-      body:dataBuffer,
+      dataBuffer,
     },
   };
 
