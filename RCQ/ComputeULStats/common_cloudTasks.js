@@ -1,10 +1,16 @@
 'use strict';
-const {v2beta3}        = require('@google-cloud/tasks');
-const cloudTasksClient    = new v2beta3.CloudTasksClient();
+const common            = require('./common');
+const {v2beta3}         = require('@google-cloud/tasks');
+const cloudTasksClient  = new v2beta3.CloudTasksClient();
 
-async function publishTask(url, serviceAccount, data)
+let projectName = common.getProjectName();
+let location    = "europe-west3";
+let queue       = "compute-stats-on-mysql";
+const parent    = cloudTasksClient.queuePath(projectName, location, queue);
+
+async function createTask(url, serviceAccount, data)
 {
-  const dataBuffer  = Buffer.from(JSON.stringify(data));
+  const dataBuffer  = Buffer.from(JSON.stringify(data)).toString('base64');
 
   const task = {
     httpRequest: {
@@ -16,7 +22,7 @@ async function publishTask(url, serviceAccount, data)
       headers: {
         'Content-Type': 'application/json',
       },
-      dataBuffer,
+      body:dataBuffer,
     },
   };
 
@@ -25,7 +31,7 @@ async function publishTask(url, serviceAccount, data)
   {
     // Send create task request.
     const [response] = await cloudTasksClient.createTask({parent, task});
-    console.log(`Created task ${response.name}`);
+    common.logDebug(`Created task ${response.name}`, {parent:parent,task:task, response:response, data:data});
     return response;
   }
   catch (error)
@@ -36,6 +42,6 @@ async function publishTask(url, serviceAccount, data)
 }
 
 module.exports = {
-  publishMessage : publishMessage,
+  createTask : createTask,
   cloudTasksClient:cloudTasksClient
 };
