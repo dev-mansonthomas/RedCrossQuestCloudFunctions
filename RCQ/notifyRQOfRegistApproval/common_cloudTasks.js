@@ -30,7 +30,7 @@ async function createTask(url, serviceAccount, data)
   try
   {
     // Send create task request.
-    common.logDebug(`Before creating task ${response.name}`, {parent:parent,task:task, data:data});
+    common.logDebug(`Before creating task`, {parent:parent,task:task, data:data});
     const [response] = await cloudTasksClient.createTask({parent, task});
     common.logDebug(`Created task ${response.name}`, {parent:parent,task:task, response:response, data:data});
     return response;
