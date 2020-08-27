@@ -37,7 +37,7 @@ async function createTask(url, serviceAccount, data)
   catch (error)
   {
     // Construct error for Stackdriver Error Reporting
-    console.error(Error(error.message));
+    console.error("error while creating tasks",error);
   }
 }
 
