@@ -10,7 +10,7 @@ const parent    = cloudTasksClient.queuePath(projectName, location, queue);
 
 async function createTask(url, serviceAccount, data)
 {
-  const dataBuffer  = Buffer.from(JSON.stringify(data));
+  const dataBuffer  = Buffer.from(JSON.stringify(data)).toString('base64');
 
   const task = {
     httpRequest: {
@@ -30,9 +30,9 @@ async function createTask(url, serviceAccount, data)
   try
   {
     // Send create task request.
-    const [response] = await cloudTasksClient.createTask({parent, task});
-    common.logDebug(`Created task ${response.name}`, {parent:parent,task:task, response:response, data:data});
-    return response;
+    //const [response] = await cloudTasksClient.createTask({parent, task});  response:response,
+    common.logDebug(`Created task ${response.name}`, {parent:parent,task:task,  data:data});
+    return {};
   }
   catch (error)
   {
