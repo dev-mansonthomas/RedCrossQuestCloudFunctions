@@ -2,7 +2,6 @@
 const common              = require('./common');
 const common_firestore    = require('./common_firestore');
 const common_mysql        = require('./common_mysql');
-const common_pubsub       = require('./common_pubsub');
 const chunk               = require('lodash.chunk');
 
 const fsCollectionName = 'ul_queteur_stats_per_year';
