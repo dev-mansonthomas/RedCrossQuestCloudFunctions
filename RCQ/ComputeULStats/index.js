@@ -26,15 +26,15 @@ exports.ComputeULStats = async (request, response) => {
   {
     await common.logDebug("ULQueteurStatsPerYear - start", task);
     const ULQueteurStatsPerYear              = require('./ULQueteurStatsPerYear.js');
-    await ULQueteurStatsPerYear.compute();
+    await ULQueteurStatsPerYear.compute(task);
     response.status(200).send('ULQueteurStatsPerYear Done');
 
   }
-  else if(task.computeType === 'queteurStats')
+  else if(task.computeType === 'ULStats')
   {
     await common.logDebug("ULStatsCurrentYear - start", task);
     const ULStatsCurrentYear              = require('./ULStatsCurrentYear.js');
-    await ULStatsCurrentYear.compute();
+    await ULStatsCurrentYear.compute(task);
     response.status(200).send('ULStatsCurrentYear Done');
   }
   else
