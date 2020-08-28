@@ -20,9 +20,7 @@ const common              = require('./common');
 exports.ComputeULStats = async (request, response) => {
 
   await common.logDebug("ComputeULStats - start", JSON.stringify(request.body));
-  response.status(200).send('ComputeULStats -  Done');
-/*
-  const task = request.body;
+  const task = JSON.parse(request.body);
 
   if(task.computeType === 'queteurStats')
   {
@@ -44,5 +42,4 @@ exports.ComputeULStats = async (request, response) => {
     await common.logDebug("Wrong value for computeType", task);
     response.status(400).send('Wrong value for computeType');
   }
- */
 };
