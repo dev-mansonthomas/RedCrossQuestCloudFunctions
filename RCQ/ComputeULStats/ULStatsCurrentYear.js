@@ -60,7 +60,7 @@ const queryStr = `
            and EXTRACT(YEAR from tqq.depart) = EXTRACT(YEAR from tq.depart)) as number_of_days_quete,
         EXTRACT(YEAR from tq.depart) as year
     from tronc_queteur as tq
-    where tq.ul_id            = ?
+    where   tq.ul_id          = ?
       AND   tq.deleted        = false
       AND   tq.comptage       is not null
       AND   YEAR(tq.depart)   = YEAR(NOW())
@@ -127,7 +127,7 @@ exports.compute = async (task) => {
         const queryArgs = [ul_id];
         mysqlPool.query(
           queryStr,
-          ul_id,
+          queryArgs,
           async (err, results) => {
 
             if (err)
