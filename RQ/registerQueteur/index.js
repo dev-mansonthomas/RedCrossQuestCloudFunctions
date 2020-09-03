@@ -10,9 +10,12 @@ admin.initializeApp();
 
 const queryStr = `
 INSERT INTO \`queteur_registration\`
-(\`first_name\`,\`last_name\`,\`man\`,\`birthdate\`,\`email\`,\`secteur\`,\`nivol\`,\`mobile\`,\`created\`,\`ul_registration_token\`, \`queteur_registration_token\`)
+(\`first_name\`,\`last_name\`,\`man\`,\`birthdate\`,
+ \`email\`,\`secteur\`,\`nivol\`,\`mobile\`,\`created\`,
+ \`ul_registration_token\`, \`queteur_registration_token\`,
+ \`firebase_sign_in_provider\`, \`firebase_uid\`, \`benevole_referent\`)
 VALUES
-( ?,?,?,?,?,?,?,?,NOW(),?,?)
+( ?,?,?,?,?,?,?,?,NOW(),?,?,?,?,?)
 `;
 
 /**
@@ -24,13 +27,9 @@ exports.registerQueteur = functions.https.onCall(async (data, context) => {
 
   common_firebase.checkAuthentication(context);
 
-  const firebaseUID     = context.auth.uid;
-  const firebaseName    = context.auth.token.name    || null;
-  const firebaseEmail   = context.auth.token.email   || null;
-  
-
-  common.logError("context.auth",context.auth);
-
+  const firebaseUID            = context.auth.uid;
+  const firebaseEmail          = context.auth.token.email   || null;
+  const firebaseSignInProvider = context.auth.token.firebase.sign_in_provider;
 
 
   // Initialize the pool lazily, in case SQL access isn't needed for this
@@ -47,11 +46,18 @@ exports.registerQueteur = functions.https.onCall(async (data, context) => {
   let nivol                = data.nivol                ;
   let mobile               = data.mobile               ;
   let ul_registration_token= data.ul_registration_token;
+  let benevole_referent    = data.benevole_referent    ;
   let queteur_reg_token    = uuidv4();
 
 
   return new Promise((resolve, reject) => {
-    const queryArgs = [first_name, last_name, man, birthdate, email, secteur, nivol, mobile, ul_registration_token, queteur_reg_token];
+    const queryArgs = [first_name, last_name, man, birthdate, email,
+                      secteur, nivol, mobile, ul_registration_token,
+                      queteur_reg_token, firebaseSignInProvider,
+                      firebaseUID, benevole_referent];
+
+    common.logDebug("Registering new Queteur From",{queryArgs:queryArgs,queryStr:queryStr, context_auth:context.auth});
+
     mysqlPool.query(
       queryStr,
       queryArgs,
