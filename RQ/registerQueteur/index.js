@@ -29,7 +29,7 @@ exports.registerQueteur = functions.https.onCall(async (data, context) => {
   const firebaseEmail   = context.auth.token.email   || null;
 
 
-  let firebaseUser: UserRecord = null;
+  let firebaseUser = null;
 
   try
   {
