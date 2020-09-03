@@ -24,11 +24,33 @@ exports.registerQueteur = functions.https.onCall(async (data, context) => {
 
   common_firebase.checkAuthentication(context);
 
+  const firebaseUID     = context.auth.uid;
+  const firebaseName    = context.auth.token.name    || null;
+  const firebaseEmail   = context.auth.token.email   || null;
+
+
+  let firebaseUser: UserRecord = null;
+
+  try
+  {
+    firebaseUser = await admin.auth().getUser(firebaseUID);
+  }
+  catch(exception)
+  {
+    common.logError("Error while fetching firebase user info",{exception:exception, firebaseUID:firebaseUID, firebaseName:firebaseName, firebaseEmail:firebaseEmail});
+    throw exception;
+  }
+
+
+
+  common.logError("User Record",firebaseUser);
+
+
+
   // Initialize the pool lazily, in case SQL access isn't needed for this
   // GCF instance. Doing so minimizes the number of active SQL connections,
   // which helps keep your GCF instances under SQL connection limits.
   let mysqlPool = await common_mysql.initMySQL('MYSQL_USER_WRITE');
-
 
   let first_name           = data.first_name           ;
   let last_name            = data.last_name            ;
