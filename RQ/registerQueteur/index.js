@@ -27,23 +27,9 @@ exports.registerQueteur = functions.https.onCall(async (data, context) => {
   const firebaseUID     = context.auth.uid;
   const firebaseName    = context.auth.token.name    || null;
   const firebaseEmail   = context.auth.token.email   || null;
+  
 
-
-  let firebaseUser = null;
-
-  try
-  {
-    firebaseUser = await admin.auth().getUser(firebaseUID);
-  }
-  catch(exception)
-  {
-    common.logError("Error while fetching firebase user info",{exception:exception, firebaseUID:firebaseUID, firebaseName:firebaseName, firebaseEmail:firebaseEmail});
-    throw exception;
-  }
-
-
-
-  common.logError("User Record",firebaseUser);
+  common.logError("context.auth",context.auth);
 
 
 
