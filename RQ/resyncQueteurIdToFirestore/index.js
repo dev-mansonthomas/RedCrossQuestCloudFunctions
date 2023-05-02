@@ -29,7 +29,7 @@ const queryStr = `
  * firestore read/write
  * MySQL read
  * */
-exports.resyncQueteurIdToFirestore = functions.https.onCall(async (data, context) => {
+exports.resyncQueteurIdToFirestore = functions.https.onRequest(async (data, context) => {
 
 
   let mysqlPool = await common_mysql.initMySQL('MYSQL_USER_READ');
