@@ -3,8 +3,10 @@ const common            = require('./common');
 const {v2beta3}         = require('@google-cloud/tasks');
 const cloudTasksClient  = new v2beta3.CloudTasksClient();
 
+const env       = process.env.ENV || null;
+
 let projectName = common.getProjectName();
-let location    = "europe-west3";
+let location    = env === 'prod' ? "europe-west1" : "europe-west3";
 let queue       = "compute-stats-on-mysql";
 const parent    = cloudTasksClient.queuePath(projectName, location, queue);
 
